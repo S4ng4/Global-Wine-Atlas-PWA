@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>World Wine Regions Directory — Atelier Cellar</title>
+    <meta name="description" content="Explore major wine regions across France, Italy, Spain, California, Chile, Argentina, Portugal, Germany, Austria, Australia, New Zealand, South Africa, and Greece.">
+    <link rel="icon" type="image/png" href="./image/icon-96x96.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/atlas.css">
+    <style>
+        .country-block {
+            margin-bottom: 2.2rem;
+        }
+        .country-block-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            padding-bottom: 0.65rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+        }
+        .country-block-title {
+            font-family: var(--atlas-font-display);
+            font-size: 1.4rem;
+            letter-spacing: 0.08em;
+            color: var(--atlas-gold-soft);
+        }
+        .regions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 0.95rem;
+        }
+        .region-enc-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 0.65rem;
+            padding: 1.15rem 1.25rem;
+            border-radius: 14px;
+            background: linear-gradient(160deg, rgba(24, 21, 18, 0.92) 0%, rgba(15, 13, 11, 0.98) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.18);
+            text-decoration: none;
+            color: var(--atlas-ivory);
+            transition: all 0.2s ease;
+        }
+        .region-enc-card:hover {
+            border-color: var(--atlas-gold);
+            transform: translateY(-3px);
+            box-shadow: var(--atlas-shadow-sm);
+        }
+        .region-enc-name {
+            font-family: var(--atlas-font-display);
+            font-size: 1.05rem;
+            color: var(--atlas-ivory);
+        }
+        .region-enc-meta {
+            font-family: var(--atlas-font-ui);
+            font-size: 0.72rem;
+            color: var(--atlas-gold-soft);
+            margin-top: 2px;
+        }
+        .region-enc-desc {
+            font-family: var(--atlas-font-editorial);
+            font-size: 1rem;
+            line-height: 1.45;
+            color: var(--atlas-muted);
+        }
+    </style>
+</head>
+<body data-page-title="World Wine Regions">
+    <header class="atlas-topbar">
+        <a href="./index.html" class="atlas-brand-link">
+            <span class="atlas-crest-badge"><img src="./image/crest.svg" alt="Cellar Crest"></span>
+            <span class="atlas-brand-text">
+                <span class="atlas-brand-name" data-brand="venueName">Atelier Cellar</span>
+                <span class="atlas-brand-sub">Global Terroir Directory</span>
+            </span>
+        </a>
+        <nav class="atlas-nav-links" id="atlasNavLinks">
+            <a href="./index.html" class="atlas-nav-pill">Home</a>
+            <a href="./wine-map.html" class="atlas-nav-pill">World Atlas</a>
+            <a href="./WineByTheGlass.html" class="atlas-nav-pill">By the Glass</a>
+            <a href="./regions.html" class="atlas-nav-pill is-active">Regions</a>
+            <a href="./SparklingWineDoc.html" class="atlas-nav-pill">Sparkling Guide</a>
+            <a href="./wine-comparison.html" class="atlas-nav-pill">
+                Compare <span class="compare-badge" data-compare-count style="display:none;">0</span>
+            </a>
+        </nav>
+        <button type="button" class="atlas-mobile-menu-btn" id="mobileNavToggle" aria-label="Menu">
+            <svg class="atlas-ico" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+    </header>
+
+    <main class="editorial-container">
+        <section class="editorial-hero">
+            <p class="editorial-kicker">Viticultural Encyclopedia</p>
+            <h1 class="editorial-title">World Wine Regions</h1>
+            <div class="gold-divider" aria-hidden="true"><span class="gold-diamond"></span></div>
+            <p class="editorial-lead">Explore climate, soil, and signature grape varieties across 14 wine nations and nearly 100 celebrated regions worldwide.</p>
+        </section>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:2rem;">
+            <div class="sidebar-chips" id="regionWorldFilter">
+                <button type="button" class="filter-chip is-active" data-rw="ALL">All World</button>
+                <button type="button" class="filter-chip" data-rw="Old World">Old World</button>
+                <button type="button" class="filter-chip" data-rw="New World">New World</button>
+            </div>
+            <input type="text" id="regionSearchInput" class="atlas-search-input" style="max-width:340px;padding-left:1rem;" placeholder="Search country, region, or grape (e.g. Rioja, Maipo, Pinot)...">
+        </div>
+
+        <div id="regionsDirectoryRoot"></div>
+    </main>
+
+    <script src="./js/world-atlas-data.js"></script>
+    <script src="./js/brand.js"></script>
+    <script src="./js/cellar-store.js"></script>
+    <script>
+        (async function initRegionsDir() {
+            await window.AtlasBrand.ready;
+            const store = window.AtlasStore;
+            store.updateCompareBadges();
+
+            const mobBtn = document.getElementById('mobileNavToggle');
+            const nav = document.getElementById('atlasNavLinks');
+            if (mobBtn && nav) mobBtn.addEventListener('click', () => nav.classList.toggle('is-mobile-open'));
+
+            const wines = await store.loadWines();
+            let worldFilter = 'ALL';
+            let query = '';
+
+            function render() {
+                const atlas = window.WorldAtlasData;
+                const root = document.getElementById('regionsDirectoryRoot');
+                const q = query.trim().toLowerCase();
+
+                const html = atlas.countries.map(c => {
+                    if (worldFilter === 'Old World' && !c.world.includes('Old')) return '';
+                    if (worldFilter === 'New World' && !c.world.includes('New')) return '';
+
+                    const matchingRegions = c.regions.filter(r => {
+                        if (!q) return true;
+                        return [c.name, r.name, r.climate, r.grapes, r.soil, r.summary].join(' ').toLowerCase().includes(q);
+                    });
+                    if (!matchingRegions.length) return '';
+
+                    const cCount = wines.filter(w => w.country === c.id).length;
+                    return `
+                        <section class="country-block">
+                            <div class="country-block-head">
+                                <div>
+                                    <h2 class="country-block-title">${store.escapeHtml(c.name)} <span style="font-size:0.75rem;font-family:var(--atlas-font-ui);color:var(--atlas-muted);font-weight:400;">&middot; ${store.escapeHtml(c.world)}</span></h2>
+                                    <p style="font-family:var(--atlas-font-editorial);font-size:1.05rem;color:var(--atlas-muted);">${store.escapeHtml(c.tagline)}</p>
+                                </div>
+                                <a href="./wine-map.html?country=${encodeURIComponent(c.id)}" class="atlas-btn">Open ${store.escapeHtml(c.name)} Map (${cCount}) &rarr;</a>
+                            </div>
+                            <div class="regions-grid">
+                                ${matchingRegions.map(r => {
+                                    const rCount = wines.filter(w => w.country === c.id && w.region === r.id).length;
+                                    return `
+                                        <a class="region-enc-card" href="./wine-map.html?country=${encodeURIComponent(c.id)}&region=${encodeURIComponent(r.id)}">
+                                            <div>
+                                                <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;">
+                                                    <h3 class="region-enc-name">${store.escapeHtml(r.name)}</h3>
+                                                    <span class="style-card-count">${rCount} ${rCount === 1 ? 'wine' : 'wines'}</span>
+                                                </div>
+                                                <div class="region-enc-meta">${store.escapeHtml(r.climate)} &middot; ${store.escapeHtml(r.grapes)}</div>
+                                            </div>
+                                            <p class="region-enc-desc">${store.escapeHtml(r.summary)}</p>
+                                            <div style="font-family:var(--atlas-font-ui);font-size:0.72rem;color:var(--atlas-subtle);">Soil: ${store.escapeHtml(r.soil)}</div>
+                                        </a>`;
+                                }).join('')}
+                            </div>
+                        </section>`;
+                }).join('');
+
+                root.innerHTML = html || '<div class="editorial-panel" style="text-align:center;color:var(--atlas-muted);">No wine regions match your search.</div>';
+            }
+
+            document.querySelectorAll('[data-rw]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    worldFilter = btn.getAttribute('data-rw');
+                    document.querySelectorAll('[data-rw]').forEach(b => b.classList.toggle('is-active', b === btn));
+                    render();
+                });
+            });
+            document.getElementById('regionSearchInput').addEventListener('input', (e) => {
+                query = e.target.value;
+                render();
+            });
+
+            render();
+        })();
+    </script>
+</body>
+</html>

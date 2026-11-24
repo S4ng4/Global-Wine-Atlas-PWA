@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Wine by the Glass — Atelier Cellar</title>
+    <meta name="description" content="Explore today's curated global wines poured by the glass across sparkling, white, rosé, skin-contact, red, dessert, and zero-proof selections.">
+    <link rel="icon" type="image/png" href="./image/icon-96x96.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/atlas.css">
+    <style>
+        .btg-group { margin-bottom: 2.25rem; }
+        .btg-group-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 0.65rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+        }
+        .btg-group-title {
+            font-family: var(--atlas-font-display);
+            font-size: 1.25rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--atlas-gold-soft);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .btg-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 0.9rem;
+        }
+        .btg-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 1.15rem;
+            border-radius: 14px;
+            background: rgba(20, 18, 16, 0.85);
+            border: 1px solid rgba(212, 175, 55, 0.16);
+            text-decoration: none;
+            color: var(--atlas-ivory);
+            transition: all 0.2s ease;
+        }
+        .btg-item:hover {
+            border-color: var(--atlas-gold);
+            transform: translateY(-2px);
+            background: rgba(30, 26, 21, 0.95);
+        }
+        .btg-prices {
+            text-align: right;
+            flex-shrink: 0;
+            font-family: var(--atlas-font-ui);
+        }
+        .btg-glass-price {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--atlas-gold);
+        }
+        .btg-bottle-price {
+            font-size: 0.74rem;
+            color: var(--atlas-muted);
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body data-page-title="Wine by the Glass">
+    <header class="atlas-topbar">
+        <a href="./index.html" class="atlas-brand-link">
+            <span class="atlas-crest-badge"><img src="./image/crest.svg" alt="Cellar Crest"></span>
+            <span class="atlas-brand-text">
+                <span class="atlas-brand-name" data-brand="venueName">Atelier Cellar</span>
+                <span class="atlas-brand-sub">Daily Pours by the Glass</span>
+            </span>
+        </a>
+        <nav class="atlas-nav-links" id="atlasNavLinks">
+            <a href="./index.html" class="atlas-nav-pill">Home</a>
+            <a href="./wine-map.html" class="atlas-nav-pill">World Atlas</a>
+            <a href="./WineByTheGlass.html" class="atlas-nav-pill is-active">By the Glass</a>
+            <a href="./regions.html" class="atlas-nav-pill">Regions</a>
+            <a href="./wine-comparison.html" class="atlas-nav-pill">
+                Compare <span class="compare-badge" data-compare-count style="display:none;">0</span>
+            </a>
+        </nav>
+        <button type="button" class="atlas-mobile-menu-btn" id="mobileNavToggle" aria-label="Menu">
+            <svg class="atlas-ico" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+    </header>
+
+    <main class="editorial-container">
+        <section class="editorial-hero">
+            <p class="editorial-kicker">Sommelier Selection &middot; Poured Fresh Daily</p>
+            <h1 class="editorial-title">Wine by the Glass</h1>
+            <div class="gold-divider" aria-hidden="true"><span class="gold-diamond"></span></div>
+            <p class="editorial-lead">Travel across hemispheres one glass at a time — from grower Champagne and coastal Albariño to California Pinot Noir, Alto Maipo Cabernet, and aged Tawny Port.</p>
+        </section>
+
+        <div class="editorial-panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.5rem;">
+                <div class="sidebar-chips" id="btgStyleFilters"></div>
+                <select id="btgCountrySelect" class="atlas-select" aria-label="Filter by country">
+                    <option value="">All Countries</option>
+                </select>
+            </div>
+            <div id="btgContent"></div>
+        </div>
+    </main>
+
+    <script src="./js/world-atlas-data.js"></script>
+    <script src="./js/brand.js"></script>
+    <script src="./js/cellar-store.js"></script>
+    <script>
+        (async function initBTG() {
+            await window.AtlasBrand.ready;
+            const store = window.AtlasStore;
+            store.updateCompareBadges();
+
+            const mobBtn = document.getElementById('mobileNavToggle');
+            const nav = document.getElementById('atlasNavLinks');
+            if (mobBtn && nav) mobBtn.addEventListener('click', () => nav.classList.toggle('is-mobile-open'));
+
+            const allWines = await store.loadWines();
+            const glassWines = allWines.filter(w => w.hasGlass);
+            let activeStyle = 'ALL';
+            let activeCountry = '';
+
+            // Populate countries
+            const countrySel = document.getElementById('btgCountrySelect');
+            const countries = [...new Set(glassWines.map(w => w.country))].sort();
+            countries.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = store.getCountryDisplayName(c);
+                countrySel.appendChild(opt);
+            });
+            countrySel.addEventListener('change', () => { activeCountry = countrySel.value; render(); });
+
+            function renderStyleFilters() {
+                const host = document.getElementById('btgStyleFilters');
+                host.innerHTML = store.STYLE_ORDER.map(key => {
+                    const count = glassWines.filter(w => (key === 'ALL' || w.style === key) && (!activeCountry || w.country === activeCountry)).length;
+                    if (key !== 'ALL' && count === 0) return '';
+                    return `<button type="button" class="filter-chip ${activeStyle === key ? 'is-active' : ''}" data-btg-style="${key}">
+                        <span class="style-dot style-dot--${key}"></span>
+                        ${store.escapeHtml(store.STYLE_META[key].label)} (${count})
+                    </button>`;
+                }).join('');
+                host.querySelectorAll('[data-btg-style]').forEach(btn => {
+                    btn.addEventListener('click', () => { activeStyle = btn.getAttribute('data-btg-style'); render(); });
+                });
+            }
+
+            function render() {
+                renderStyleFilters();
+                const filtered = glassWines.filter(w =>
+                    (activeStyle === 'ALL' || w.style === activeStyle) &&
+                    (!activeCountry || w.country === activeCountry)
+                );
+
+                const order = ['SPARKLING', 'WHITE', 'ROSE', 'ORANGE', 'RED', 'DESSERT', 'NON-ALCOHOLIC'];
+                const container = document.getElementById('btgContent');
+
+                const sections = order.map(styleKey => {
+                    const items = filtered.filter(w => w.style === styleKey)
+                        .sort((a, b) => parseFloat(a.wine_price_glass) - parseFloat(b.wine_price_glass));
+                    if (!items.length) return '';
+                    const meta = store.STYLE_META[styleKey];
+                    return `
+                        <section class="btg-group">
+                            <div class="btg-group-header">
+                                <h2 class="btg-group-title"><span class="style-dot style-dot--${styleKey}"></span> ${store.escapeHtml(meta.label)}</h2>
+                                <span style="font-family:var(--atlas-font-ui);font-size:0.75rem;color:var(--atlas-muted);">${items.length} pours</span>
+                            </div>
+                            <div class="btg-list">
+                                ${items.map(w => `
+                                    <a class="btg-item" href="./wine-details.html?wine=${encodeURIComponent(w.wine_number)}">
+                                        <div>
+                                            <div class="wine-card-producer">${store.escapeHtml(w.wine_producer)}</div>
+                                            <div class="wine-card-name" style="margin:2px 0;">${store.escapeHtml(w.wine_name)}</div>
+                                            <div class="wine-card-origin">${store.escapeHtml(store.getRegionDisplayName(w.country, w.region))}, ${store.escapeHtml(store.getCountryDisplayName(w.country))} &middot; ${store.escapeHtml(w.vintage || 'NV')}</div>
+                                            <div class="wine-card-varietal" style="margin-top:4px;">${store.escapeHtml(w.varietals || '')}</div>
+                                        </div>
+                                        <div class="btg-prices">
+                                            <div class="btg-glass-price">${window.AtlasBrand.formatPrice(w.wine_price_glass)}</div>
+                                            <div class="btg-bottle-price">Glass</div>
+                                            <div class="btg-bottle-price" style="margin-top:6px;">Btl ${window.AtlasBrand.formatPrice(w.wine_price_bottle || w.wine_price)}</div>
+                                        </div>
+                                    </a>
+                                `).join('')}
+                            </div>
+                        </section>`;
+                }).join('');
+
+                container.innerHTML = sections || '<p style="text-align:center;color:var(--atlas-muted);padding:2rem;">No by-the-glass pours match the selected filter.</p>';
+            }
+
+            render();
+        })();
+    </script>
+</body>
+</html>

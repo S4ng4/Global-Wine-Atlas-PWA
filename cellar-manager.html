@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Cellar &amp; White-Label Brand Manager — Atelier Cellar</title>
+    <meta name="description" content="Manage your global wine cellar inventory and customize white-label venue branding, currency, and theme presets.">
+    <link rel="icon" type="image/png" href="./image/icon-96x96.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/atlas.css">
+    <style>
+        .mgr-tabs {
+            display: flex;
+            gap: 0.6rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--atlas-border);
+            padding-bottom: 0.85rem;
+            flex-wrap: wrap;
+        }
+        .mgr-tab-panel { display: none; }
+        .mgr-tab-panel.active { display: block; }
+        .mgr-table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--atlas-border);
+            border-radius: 14px;
+            background: rgba(15, 13, 11, 0.9);
+        }
+        table.mgr-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--atlas-font-ui);
+            font-size: 0.82rem;
+        }
+        .mgr-table th {
+            text-align: left;
+            padding: 0.8rem 0.9rem;
+            font-size: 0.68rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--atlas-gold-soft);
+            background: rgba(212, 175, 55, 0.08);
+            border-bottom: 1px solid var(--atlas-border);
+        }
+        .mgr-table td {
+            padding: 0.7rem 0.9rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.09);
+            color: var(--atlas-ivory);
+            vertical-align: middle;
+        }
+        .mgr-table tr:hover td { background: rgba(212, 175, 55, 0.05); }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.9rem;
+        }
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .form-field--full { grid-column: 1 / -1; }
+        .form-field label {
+            font-family: var(--atlas-font-ui);
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--atlas-gold-soft);
+        }
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border-radius: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            background: rgba(11, 10, 9, 0.85);
+            color: var(--atlas-ivory);
+            font-family: var(--atlas-font-ui);
+            font-size: 0.84rem;
+        }
+        .form-textarea { min-height: 78px; resize: vertical; }
+        .preset-swatch {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.55rem 0.9rem;
+            border-radius: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            background: rgba(18, 16, 14, 0.9);
+            color: var(--atlas-ivory);
+            cursor: pointer;
+            font-family: var(--atlas-font-ui);
+            font-size: 0.78rem;
+        }
+        .preset-swatch.is-active { border-color: var(--atlas-gold); background: rgba(212, 175, 55, 0.16); }
+        .swatch-dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+    </style>
+</head>
+<body data-page-title="Cellar & Brand Manager">
+    <header class="atlas-topbar">
+        <a href="./index.html" class="atlas-brand-link">
+            <span class="atlas-crest-badge"><img src="./image/crest.svg" alt="Cellar Crest"></span>
+            <span class="atlas-brand-text">
+                <span class="atlas-brand-name" data-brand="venueName">Atelier Cellar</span>
+                <span class="atlas-brand-sub">Cellar &amp; White-Label Manager</span>
+            </span>
+        </a>
+        <nav class="atlas-nav-links" id="atlasNavLinks">
+            <a href="./index.html" class="atlas-nav-pill">Home</a>
+            <a href="./wine-map.html" class="atlas-nav-pill">World Atlas</a>
+            <a href="./WineByTheGlass.html" class="atlas-nav-pill">By the Glass</a>
+            <a href="./cellar-manager.html" class="atlas-nav-pill is-active">Manager</a>
+        </nav>
+        <button type="button" class="atlas-mobile-menu-btn" id="mobileNavToggle" aria-label="Menu">
+            <svg class="atlas-ico" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+    </header>
+
+    <main class="editorial-container">
+        <div class="mgr-tabs" role="tablist">
+            <button type="button" class="atlas-btn atlas-btn--primary" data-tab="inventory">Cellar Inventory (<span id="mgrWineCount">0</span>)</button>
+            <button type="button" class="atlas-btn" data-tab="branding">White-Label Brand Customizer</button>
+        </div>
+
+        <!-- TAB 1: INVENTORY -->
+        <section class="mgr-tab-panel active" id="tab-inventory">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1rem;">
+                <div style="display:flex;gap:0.6rem;flex-wrap:wrap;flex:1;">
+                    <input type="text" id="mgrSearch" class="atlas-search-input" style="max-width:300px;padding-left:1rem;" placeholder="Search cellar...">
+                    <select id="mgrCountryFilter" class="atlas-select"><option value="">All Countries</option></select>
+                </div>
+                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                    <button type="button" class="atlas-btn atlas-btn--primary" id="addNewWineBtn">+ Add Wine</button>
+                    <button type="button" class="atlas-btn" id="saveServerWinesBtn">Save to data/wines.json</button>
+                    <button type="button" class="atlas-btn" id="exportWinesBtn">Export JSON</button>
+                    <label class="atlas-btn" style="cursor:pointer;">
+                        Import JSON
+                        <input type="file" id="importWinesInput" accept=".json" style="display:none;">
+                    </label>
+                </div>
+            </div>
+
+            <div class="mgr-table-wrap">
+                <table class="mgr-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Wine &amp; Producer</th>
+                            <th>Country / Region</th>
+                            <th>Style</th>
+                            <th>Bottle / Glass</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mgrTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TAB 2: WHITE-LABEL BRANDING -->
+        <section class="mgr-tab-panel" id="tab-branding">
+            <div class="editorial-panel">
+                <h2 style="font-family:var(--atlas-font-display);font-size:1.3rem;color:var(--atlas-gold-soft);margin-bottom:0.4rem;">White-Label Hospitality Identity</h2>
+                <p style="font-family:var(--atlas-font-editorial);font-size:1.08rem;color:var(--atlas-muted);margin-bottom:1.4rem;">Personalize venue name, tagline, address, currency symbol, and accent palette. Changes preview live across every page and can be saved directly to <code>config/brand.json</code> or exported for static hosting.</p>
+
+                <form id="brandForm" class="form-grid">
+                    <div class="form-field">
+                        <label for="bfVenueName">Venue / Restaurant Name</label>
+                        <input id="bfVenueName" class="form-input" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="bfShortName">PWA Short Name</label>
+                        <input id="bfShortName" class="form-input">
+                    </div>
+                    <div class="form-field">
+                        <label for="bfCurrency">Currency Symbol</label>
+                        <select id="bfCurrency" class="form-input">
+                            <option value="$">$ (USD / CAD / AUD)</option>
+                            <option value="€">&euro; (EUR)</option>
+                            <option value="£">&pound; (GBP)</option>
+                            <option value="CHF ">CHF</option>
+                            <option value="¥">&yen; (JPY)</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="bfLocation">Topbar Location Line</label>
+                        <input id="bfLocation" class="form-input">
+                    </div>
+                    <div class="form-field form-field--full">
+                        <label for="bfKicker">Hero Kicker</label>
+                        <input id="bfKicker" class="form-input">
+                    </div>
+                    <div class="form-field form-field--full">
+                        <label for="bfTagline">Footer Tagline</label>
+                        <input id="bfTagline" class="form-input">
+                    </div>
+                    <div class="form-field form-field--full">
+                        <label for="bfAddress">Footer Address &amp; Contact</label>
+                        <input id="bfAddress" class="form-input">
+                    </div>
+                    <div class="form-field form-field--full">
+                        <label for="bfHeroLead">Hero Description</label>
+                        <textarea id="bfHeroLead" class="form-textarea"></textarea>
+                    </div>
+                    <div class="form-field form-field--full">
+                        <label>Luxury Accent Palette Preset</label>
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:0.2rem;" id="brandPresetSwatches"></div>
+                    </div>
+                    <div class="form-field--full" style="display:flex;gap:0.65rem;flex-wrap:wrap;margin-top:0.5rem;">
+                        <button type="submit" class="atlas-btn atlas-btn--primary">Apply &amp; Save Brand Config</button>
+                        <button type="button" class="atlas-btn" id="downloadBrandBtn">Download brand.json</button>
+                        <button type="button" class="atlas-btn" id="resetBrandBtn">Reset Defaults</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Add / Edit Wine Modal -->
+    <div class="atlas-modal-backdrop" id="wineEditModal" role="dialog" aria-modal="true">
+        <div class="atlas-modal" style="max-width:740px;">
+            <div class="atlas-modal-header">
+                <h3 id="wineModalTitle">Edit Wine</h3>
+                <button type="button" class="atlas-btn" id="closeWineModalBtn" style="padding:0.35rem 0.7rem;">Close</button>
+            </div>
+            <div class="atlas-modal-body">
+                <form id="wineEditForm" class="form-grid">
+                    <input type="hidden" id="wfIndex">
+                    <div class="form-field"><label for="wfNumber">Cellar #</label><input id="wfNumber" class="form-input" required></div>
+                    <div class="form-field"><label for="wfName">Wine Name</label><input id="wfName" class="form-input" required></div>
+                    <div class="form-field"><label for="wfProducer">Producer / Estate</label><input id="wfProducer" class="form-input" required></div>
+                    <div class="form-field"><label for="wfVintage">Vintage</label><input id="wfVintage" class="form-input" placeholder="e.g. 2021 or NV"></div>
+                    <div class="form-field"><label for="wfCountry">Country</label><select id="wfCountry" class="form-input" required></select></div>
+                    <div class="form-field"><label for="wfRegion">Wine Region</label><select id="wfRegion" class="form-input" required></select></div>
+                    <div class="form-field"><label for="wfAppellation">Appellation / AVA / DOC</label><input id="wfAppellation" class="form-input"></div>
+                    <div class="form-field">
+                        <label for="wfStyle">Wine Style</label>
+                        <select id="wfStyle" class="form-input">
+                            <option value="RED">Red</option>
+                            <option value="WHITE">White</option>
+                            <option value="ROSE">Rosé</option>
+                            <option value="ORANGE">Orange / Amber</option>
+                            <option value="SPARKLING">Sparkling</option>
+                            <option value="DESSERT">Dessert &amp; Fortified</option>
+                            <option value="NON-ALCOHOLIC">Zero-Proof</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="wfBody">Palate Body</label>
+                        <select id="wfBody" class="form-input">
+                            <option value="Light">Light</option>
+                            <option value="Light-Medium">Light-Medium</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Medium-Full">Medium-Full</option>
+                            <option value="Full">Full</option>
+                        </select>
+                    </div>
+                    <div class="form-field"><label for="wfPriceBottle">Bottle Price</label><input id="wfPriceBottle" class="form-input" type="number" step="0.5" required></div>
+                    <div class="form-field"><label for="wfPriceGlass">Glass Price (optional)</label><input id="wfPriceGlass" class="form-input" type="number" step="0.5"></div>
+                    <div class="form-field"><label for="wfAlcohol">Alcohol %</label><input id="wfAlcohol" class="form-input" placeholder="13.5%"></div>
+                    <div class="form-field form-field--full"><label for="wfVarietals">Grape Varietals</label><input id="wfVarietals" class="form-input" placeholder="e.g. 100% Pinot Noir"></div>
+                    <div class="form-field"><label for="wfSoil">Soil</label><input id="wfSoil" class="form-input"></div>
+                    <div class="form-field"><label for="wfElevation">Elevation</label><input id="wfElevation" class="form-input"></div>
+                    <div class="form-field form-field--full"><label for="wfAging">Aging / Élevage</label><input id="wfAging" class="form-input"></div>
+                    <div class="form-field form-field--full"><label for="wfDesc">Sommelier Description</label><textarea id="wfDesc" class="form-textarea"></textarea></div>
+                    <div class="form-field form-field--full"><label for="wfPairing">Food Pairing</label><input id="wfPairing" class="form-input"></div>
+                    <div class="form-field form-field--full">
+                        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+                            <input type="checkbox" id="wfOrganic"> Organic / Biodynamic Certified
+                        </label>
+                    </div>
+                    <div class="form-field--full" style="display:flex;justify-content:flex-end;gap:0.6rem;">
+                        <button type="submit" class="atlas-btn atlas-btn--primary">Save Wine</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/world-atlas-data.js"></script>
+    <script src="./js/brand.js"></script>
+    <script src="./js/cellar-store.js"></script>
+    <script>
+        (async function initManager() {
+            const brand = await window.AtlasBrand.ready;
+            const store = window.AtlasStore;
+            const atlas = window.WorldAtlasData;
+
+            const mobBtn = document.getElementById('mobileNavToggle');
+            const nav = document.getElementById('atlasNavLinks');
+            if (mobBtn && nav) mobBtn.addEventListener('click', () => nav.classList.toggle('is-mobile-open'));
+
+            let wines = [...(await store.loadWines())];
+            let activePreset = brand.accentPreset || 'antique-gold';
+
+            // Tabs
+            document.querySelectorAll('[data-tab]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tab = btn.getAttribute('data-tab');
+                    document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('atlas-btn--primary', b === btn));
+                    document.querySelectorAll('.mgr-tab-panel').forEach(p => p.classList.toggle('active', p.id === `tab-${tab}`));
+                });
+            });
+
+            // Country dropdowns
+            const filterCountrySel = document.getElementById('mgrCountryFilter');
+            const wfCountry = document.getElementById('wfCountry');
+            const wfRegion = document.getElementById('wfRegion');
+
+            atlas.countries.forEach(c => {
+                const o1 = document.createElement('option');
+                o1.value = c.id; o1.textContent = c.name;
+                filterCountrySel.appendChild(o1);
+
+                const o2 = document.createElement('option');
+                o2.value = c.id; o2.textContent = c.name;
+                wfCountry.appendChild(o2);
+            });
+
+            function populateRegionSelect(countryId, selectedRegion) {
+                const country = atlas.countries.find(c => c.id === countryId) || atlas.countries[0];
+                wfRegion.innerHTML = country.regions.map(r =>
+                    `<option value="${store.escapeHtml(r.id)}" ${r.id === selectedRegion ? 'selected' : ''}>${store.escapeHtml(r.name)}</option>`
+                ).join('');
+            }
+            wfCountry.addEventListener('change', () => populateRegionSelect(wfCountry.value, ''));
+
+            function renderTable() {
+                const q = document.getElementById('mgrSearch').value.trim().toLowerCase();
+                const cf = filterCountrySel.value;
+                document.getElementById('mgrWineCount').textContent = String(wines.length);
+
+                const rows = wines.map((w, idx) => ({ w, idx })).filter(({ w }) => {
+                    if (cf && w.country !== cf) return false;
+                    if (!q) return true;
+                    return [w.wine_number, w.wine_name, w.wine_producer, w.country, w.region, w.varietals].join(' ').toLowerCase().includes(q);
+                });
+
+                const tbody = document.getElementById('mgrTableBody');
+                tbody.innerHTML = rows.map(({ w, idx }) => `
+                    <tr>
+                        <td>${store.escapeHtml(w.wine_number)}</td>
+                        <td>
+                            <div style="font-weight:600;">${store.escapeHtml(w.wine_name)}</div>
+                            <div style="font-size:0.74rem;color:var(--atlas-muted);">${store.escapeHtml(w.wine_producer)} &middot; ${store.escapeHtml(w.vintage || 'NV')}</div>
+                        </td>
+                        <td>${store.escapeHtml(store.getCountryDisplayName(w.country))} &rsaquo; ${store.escapeHtml(store.getRegionDisplayName(w.country, w.region))}</td>
+                        <td><span class="wine-style-badge wine-style-badge--${store.escapeHtml(w.style)}">${store.escapeHtml(w.style)}</span></td>
+                        <td>${window.AtlasBrand.formatPrice(w.wine_price_bottle || w.wine_price)}${w.wine_price_glass ? ` / ${window.AtlasBrand.formatPrice(w.wine_price_glass)}` : ''}</td>
+                        <td style="white-space:nowrap;">
+                            <button type="button" class="atlas-btn" data-edit-idx="${idx}" style="padding:0.3rem 0.6rem;font-size:0.72rem;">Edit</button>
+                            <button type="button" class="atlas-btn" data-del-idx="${idx}" style="padding:0.3rem 0.6rem;font-size:0.72rem;border-color:rgba(200,70,70,0.45);color:#F3A6A6;">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                tbody.querySelectorAll('[data-edit-idx]').forEach(b => b.addEventListener('click', () => openEditModal(Number(b.getAttribute('data-edit-idx')))));
+                tbody.querySelectorAll('[data-del-idx]').forEach(b => b.addEventListener('click', () => {
+                    const i = Number(b.getAttribute('data-del-idx'));
+                    wines.splice(i, 1);
+                    store.saveLocalWines(wines);
+                    renderTable();
+                    store.showToast('Wine removed (click Save to persist to server)');
+                }));
+            }
+
+            function openEditModal(idx) {
+                const modal = document.getElementById('wineEditModal');
+                const isNew = idx < 0;
+                document.getElementById('wineModalTitle').textContent = isNew ? 'Add New Wine' : 'Edit Wine';
+                document.getElementById('wfIndex').value = String(idx);
+
+                const w = isNew ? {
+                    wine_number: String(Math.max(100, ...wines.map(x => parseInt(x.wine_number, 10) || 100)) + 1),
+                    wine_name: '', wine_producer: '', vintage: '2022',
+                    country: 'FRANCE', region: 'BORDEAUX', appellation: '',
+                    style: 'RED', body: 'Medium', wine_price_bottle: '75', wine_price_glass: '',
+                    alcohol: '13.5%', varietals: '', soil: '', elevation: '', aging: '',
+                    wine_description: '', food_pairing: '', organic: false
+                } : wines[idx];
+
+                document.getElementById('wfNumber').value = w.wine_number || '';
+                document.getElementById('wfName').value = w.wine_name || '';
+                document.getElementById('wfProducer').value = w.wine_producer || '';
+                document.getElementById('wfVintage').value = w.vintage || '';
+                wfCountry.value = w.country || 'FRANCE';
+                populateRegionSelect(wfCountry.value, w.region || '');
+                document.getElementById('wfAppellation').value = w.appellation || '';
+                document.getElementById('wfStyle').value = w.style || 'RED';
+                document.getElementById('wfBody').value = w.body || 'Medium';
+                document.getElementById('wfPriceBottle').value = w.wine_price_bottle || w.wine_price || '';
+                document.getElementById('wfPriceGlass').value = w.wine_price_glass || '';
+                document.getElementById('wfAlcohol').value = w.alcohol || '';
+                document.getElementById('wfVarietals').value = w.varietals || '';
+                document.getElementById('wfSoil').value = w.soil || '';
+                document.getElementById('wfElevation').value = w.elevation || '';
+                document.getElementById('wfAging').value = w.aging || '';
+                document.getElementById('wfDesc').value = w.wine_description || '';
+                document.getElementById('wfPairing').value = w.food_pairing || '';
+                document.getElementById('wfOrganic').checked = Boolean(w.organic);
+                modal.classList.add('open');
+            }
+
+            document.getElementById('addNewWineBtn').addEventListener('click', () => openEditModal(-1));
+            document.getElementById('closeWineModalBtn').addEventListener('click', () => document.getElementById('wineEditModal').classList.remove('open'));
+            document.getElementById('mgrSearch').addEventListener('input', renderTable);
+            filterCountrySel.addEventListener('change', renderTable);
+
+            document.getElementById('wineEditForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const idx = Number(document.getElementById('wfIndex').value);
+                const pb = document.getElementById('wfPriceBottle').value.trim();
+                const pg = document.getElementById('wfPriceGlass').value.trim();
+                const style = document.getElementById('wfStyle').value;
+                const entry = {
+                    ...(idx >= 0 ? wines[idx] : {}),
+                    wine_number: document.getElementById('wfNumber').value.trim(),
+                    wine_name: document.getElementById('wfName').value.trim(),
+                    wine_producer: document.getElementById('wfProducer').value.trim(),
+                    vintage: document.getElementById('wfVintage').value.trim() || 'NV',
+                    country: wfCountry.value,
+                    region: wfRegion.value,
+                    appellation: document.getElementById('wfAppellation').value.trim(),
+                    wine_type: style,
+                    style,
+                    body: document.getElementById('wfBody').value,
+                    wine_price: pb,
+                    wine_price_bottle: pb,
+                    wine_price_glass: pg || null,
+                    alcohol: document.getElementById('wfAlcohol').value.trim(),
+                    varietals: document.getElementById('wfVarietals').value.trim(),
+                    soil: document.getElementById('wfSoil').value.trim(),
+                    elevation: document.getElementById('wfElevation').value.trim(),
+                    aging: document.getElementById('wfAging').value.trim(),
+                    wine_description: document.getElementById('wfDesc').value.trim(),
+                    food_pairing: document.getElementById('wfPairing').value.trim(),
+                    organic: document.getElementById('wfOrganic').checked
+                };
+                if (idx >= 0) wines[idx] = entry;
+                else wines.unshift(entry);
+                wines = store.saveLocalWines(wines);
+                document.getElementById('wineEditModal').classList.remove('open');
+                renderTable();
+                store.showToast('Wine saved locally — click "Save to data/wines.json" to write to disk');
+            });
+
+            document.getElementById('saveServerWinesBtn').addEventListener('click', async () => {
+                try {
+                    const res = await fetch('/save-wines-json', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ wines })
+                    });
+                    if (!res.ok) throw new Error('Server error');
+                    store.clearLocalWines();
+                    store.showToast(`Saved ${wines.length} wines to data/wines.json`);
+                } catch (_) {
+                    store.saveLocalWines(wines);
+                    store.showToast('Saved in browser preview (start server.py or use Export JSON to persist to disk)');
+                }
+            });
+
+            document.getElementById('exportWinesBtn').addEventListener('click', () => {
+                const blob = new Blob([JSON.stringify({ wines }, null, 2)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'wines.json';
+                a.click();
+            });
+
+            document.getElementById('importWinesInput').addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                    const parsed = JSON.parse(await file.text());
+                    if (!Array.isArray(parsed.wines)) throw new Error('Missing wines array');
+                    wines = store.saveLocalWines(parsed.wines);
+                    renderTable();
+                    store.showToast(`Imported ${wines.length} wines`);
+                } catch (err) {
+                    store.showToast('Invalid JSON file: must contain a "wines" array');
+                }
+            });
+
+            // Brand Customizer Setup
+            function hydrateBrandForm(b) {
+                document.getElementById('bfVenueName').value = b.venueName || '';
+                document.getElementById('bfShortName').value = b.shortName || '';
+                document.getElementById('bfCurrency').value = b.currency || '$';
+                document.getElementById('bfLocation').value = b.location || '';
+                document.getElementById('bfKicker').value = b.venueKicker || '';
+                document.getElementById('bfTagline').value = b.venueTagline || '';
+                document.getElementById('bfAddress').value = b.address || '';
+                document.getElementById('bfHeroLead').value = b.heroLead || '';
+                activePreset = b.accentPreset || 'antique-gold';
+                renderPresets();
+            }
+
+            function renderPresets() {
+                const host = document.getElementById('brandPresetSwatches');
+                host.innerHTML = Object.entries(window.AtlasBrand.presets).map(([key, p]) => `
+                    <button type="button" class="preset-swatch ${activePreset === key ? 'is-active' : ''}" data-preset="${key}">
+                        <span class="swatch-dot" style="background:${p.gold};"></span>
+                        <span>${p.label}</span>
+                    </button>
+                `).join('');
+                host.querySelectorAll('[data-preset]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        activePreset = btn.getAttribute('data-preset');
+                        renderPresets();
+                        const preset = window.AtlasBrand.presets[activePreset];
+                        window.AtlasBrand.apply({
+                            ...window.AtlasBrand.get(),
+                            accentPreset: activePreset,
+                            theme: { ...window.AtlasBrand.get().theme, ...preset }
+                        });
+                    });
+                });
+            }
+
+            function collectBrandFromForm() {
+                const preset = window.AtlasBrand.presets[activePreset] || window.AtlasBrand.presets['antique-gold'];
+                return {
+                    ...window.AtlasBrand.get(),
+                    venueName: document.getElementById('bfVenueName').value.trim() || 'Atelier Cellar',
+                    shortName: document.getElementById('bfShortName').value.trim() || 'Wine Atlas',
+                    currency: document.getElementById('bfCurrency').value,
+                    location: document.getElementById('bfLocation').value.trim(),
+                    venueKicker: document.getElementById('bfKicker').value.trim(),
+                    venueTagline: document.getElementById('bfTagline').value.trim(),
+                    address: document.getElementById('bfAddress').value.trim(),
+                    heroLead: document.getElementById('bfHeroLead').value.trim(),
+                    accentPreset: activePreset,
+                    theme: {
+                        ...window.AtlasBrand.defaults.theme,
+                        gold: preset.gold,
+                        goldSoft: preset.goldSoft,
+                        goldDeep: preset.goldDeep,
+                        burgundy: preset.burgundy
+                    }
+                };
+            }
+
+            document.getElementById('brandForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const updated = collectBrandFromForm();
+                window.AtlasBrand.saveLocalOverride(updated);
+                try {
+                    const res = await fetch('/save-brand-json', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updated)
+                    });
+                    if (res.ok) {
+                        window.AtlasBrand.clearLocalOverride();
+                        store.showToast('Brand configuration saved to config/brand.json');
+                        return;
+                    }
+                } catch (_) {}
+                store.showToast('White-label brand applied live in browser!');
+            });
+
+            document.getElementById('downloadBrandBtn').addEventListener('click', () => {
+                const updated = collectBrandFromForm();
+                const blob = new Blob([JSON.stringify(updated, null, 2)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'brand.json';
+                a.click();
+            });
+
+            document.getElementById('resetBrandBtn').addEventListener('click', () => {
+                window.AtlasBrand.clearLocalOverride();
+                window.AtlasBrand.apply(window.AtlasBrand.defaults);
+                hydrateBrandForm(window.AtlasBrand.defaults);
+                store.showToast('Reset to default white-label branding');
+            });
+
+            hydrateBrandForm(brand);
+            renderTable();
+        })();
+    </script>
+</body>
+</html>

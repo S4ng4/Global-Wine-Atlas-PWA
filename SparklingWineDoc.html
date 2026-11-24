@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>World Sparkling Wine Guide — Atelier Cellar</title>
+    <meta name="description" content="A sommelier guide to sparkling winemaking methods worldwide: Traditional Method (Champagne, Franciacorta, Corpinnat, Cap Classique, Tasmania), Tank/Charmat Method, and Ancestral Pét-Nat.">
+    <link rel="icon" type="image/png" href="./image/icon-96x96.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/atlas.css">
+    <style>
+        .methods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.35rem;
+            margin-bottom: 2.25rem;
+        }
+        .method-card {
+            background: linear-gradient(160deg, rgba(26, 23, 20, 0.96) 0%, rgba(14, 12, 10, 0.98) 100%);
+            border: 1px solid var(--atlas-border);
+            border-radius: 16px;
+            padding: 1.6rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .method-tag {
+            font-family: var(--atlas-font-ui);
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--atlas-gold);
+        }
+        .method-title {
+            font-family: var(--atlas-font-display);
+            font-size: 1.35rem;
+            color: var(--atlas-ivory);
+        }
+        .method-body {
+            font-family: var(--atlas-font-editorial);
+            font-size: 1.08rem;
+            line-height: 1.55;
+            color: var(--atlas-muted);
+        }
+        .method-detail {
+            font-family: var(--atlas-font-ui);
+            font-size: 0.78rem;
+            color: var(--atlas-ivory);
+            padding-top: 0.65rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.14);
+        }
+        .method-detail strong { color: var(--atlas-gold-soft); }
+    </style>
+</head>
+<body data-page-title="World Sparkling Wine Guide">
+    <header class="atlas-topbar">
+        <a href="./index.html" class="atlas-brand-link">
+            <span class="atlas-crest-badge"><img src="./image/crest.svg" alt="Cellar Crest"></span>
+            <span class="atlas-brand-text">
+                <span class="atlas-brand-name" data-brand="venueName">Atelier Cellar</span>
+                <span class="atlas-brand-sub">Sparkling Wine Guide</span>
+            </span>
+        </a>
+        <nav class="atlas-nav-links" id="atlasNavLinks">
+            <a href="./index.html" class="atlas-nav-pill">Home</a>
+            <a href="./wine-map.html" class="atlas-nav-pill">World Atlas</a>
+            <a href="./WineByTheGlass.html" class="atlas-nav-pill">By the Glass</a>
+            <a href="./SparklingWineDoc.html" class="atlas-nav-pill is-active">Sparkling Guide</a>
+        </nav>
+        <button type="button" class="atlas-mobile-menu-btn" id="mobileNavToggle" aria-label="Menu">
+            <svg class="atlas-ico" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+    </header>
+
+    <main class="editorial-container">
+        <section class="editorial-hero">
+            <p class="editorial-kicker">Effervescence Around the World</p>
+            <h1 class="editorial-title">Sparkling Wine Guide</h1>
+            <div class="gold-divider" aria-hidden="true"><span class="gold-diamond"></span></div>
+            <p class="editorial-lead">Understanding the three great winemaking traditions behind fine bubbles — from chalk-aged Champagne and Franciacorta to Spanish Corpinnat, Tasmanian Brut, and vibrant Pét-Nat.</p>
+        </section>
+
+        <section class="methods-grid">
+            <article class="method-card">
+                <span class="method-tag">Méthode Traditionnelle / Metodo Classico</span>
+                <h2 class="method-title">Traditional Method</h2>
+                <p class="method-body">Second fermentation takes place inside the very bottle served at your table. Extended lees aging (18 to 84+ months) imparts fine pinpoint mousse, toasted brioche, hazelnut, and remarkable aging longevity.</p>
+                <div class="method-detail"><strong>Global Icons:</strong> Champagne (France), Franciacorta &amp; TrentoDOC (Italy), Cava &amp; Corpinnat (Spain), Méthode Cap Classique (South Africa), Tasmania (Australia), Sonoma Coast (USA).</div>
+            </article>
+
+            <article class="method-card">
+                <span class="method-tag">Charmat / Metodo Martinotti</span>
+                <h2 class="method-title">Tank Method</h2>
+                <p class="method-body">Second fermentation occurs in pressurized stainless-steel autoclaves, preserving luminous primary fruit aromatics — white peach, pear blossom, and crisp citrus — with an exuberant, refreshing sparkle.</p>
+                <div class="method-detail"><strong>Global Icons:</strong> Prosecco Superiore Valdobbiadene (Veneto, Italy), artisanal dry Lambrusco (Emilia-Romagna), crisp Sekt (Germany &amp; Austria).</div>
+            </article>
+
+            <article class="method-card">
+                <span class="method-tag">Méthode Ancestrale / Pét-Nat</span>
+                <h2 class="method-title">Ancestral Method</h2>
+                <p class="method-body">The oldest sparkling method in history: wine is bottled before primary fermentation finishes, trapping natural carbonation with zero dosage. Often unfiltered, wild, dry, and irresistibly joyful.</p>
+                <div class="method-detail"><strong>Global Icons:</strong> Loire Valley &amp; Jura (France), Col Fondo (Veneto, Italy), Penedès Ancestral (Spain), Willamette &amp; Finger Lakes (USA).</div>
+            </article>
+        </section>
+
+        <section>
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.1rem;">
+                <h2 style="font-family:var(--atlas-font-display);font-size:1.3rem;letter-spacing:0.08em;color:var(--atlas-gold-soft);">Sparkling Selections in Our Cellar</h2>
+                <a href="./wine-map.html?style=SPARKLING&view=list" class="atlas-btn atlas-btn--primary">Open in World Atlas &rarr;</a>
+            </div>
+            <div class="wines-cards-grid" id="sparklingGrid"></div>
+        </section>
+    </main>
+
+    <script src="./js/world-atlas-data.js"></script>
+    <script src="./js/brand.js"></script>
+    <script src="./js/bottle-visual.js"></script>
+    <script src="./js/cellar-store.js"></script>
+    <script>
+        (async function initSparkling() {
+            await window.AtlasBrand.ready;
+            const store = window.AtlasStore;
+            const mobBtn = document.getElementById('mobileNavToggle');
+            const nav = document.getElementById('atlasNavLinks');
+            if (mobBtn && nav) mobBtn.addEventListener('click', () => nav.classList.toggle('is-mobile-open'));
+
+            const wines = await store.loadWines();
+            const sparkling = store.filterWines(wines, { style: 'SPARKLING', sort: 'price-asc' });
+            const grid = document.getElementById('sparklingGrid');
+            grid.innerHTML = sparkling.map(w => store.renderWineCard(w)).join('');
+            grid.querySelectorAll('.wine-card').forEach(card => {
+                const num = card.getAttribute('data-wine-number');
+                card.addEventListener('click', (e) => {
+                    const cmp = e.target.closest('[data-compare-btn]');
+                    if (cmp) {
+                        e.stopPropagation();
+                        const res = store.toggleCompareId(num);
+                        if (!res.full) {
+                            cmp.classList.toggle('is-added', res.added);
+                            cmp.textContent = res.added ? 'Compared ✓' : '+ Compare';
+                        }
+                        return;
+                    }
+                    window.location.href = `./wine-details.html?wine=${encodeURIComponent(num)}`;
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

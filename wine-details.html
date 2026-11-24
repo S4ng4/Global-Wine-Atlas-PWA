@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Wine Dossier — Atelier Cellar</title>
+    <meta name="description" content="Detailed sommelier wine dossier including terroir, elevation, aging, tasting notes, and food pairing.">
+    <link rel="icon" type="image/png" href="./image/icon-96x96.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/atlas.css">
+    <style>
+        .dossier-shell {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: clamp(1.2rem, 3vw, 2.2rem) clamp(1rem, 3vw, 1.75rem) 4rem;
+        }
+
+        .dossier-hero {
+            display: grid;
+            grid-template-columns: minmax(170px, 240px) 1fr;
+            gap: clamp(1.25rem, 3.5vw, 2.75rem);
+            align-items: center;
+            background: linear-gradient(155deg, rgba(28, 24, 20, 0.96) 0%, rgba(14, 12, 10, 0.98) 100%);
+            border: 1px solid var(--atlas-border);
+            border-radius: 20px;
+            padding: clamp(1.25rem, 3.2vw, 2.4rem);
+            box-shadow: var(--atlas-shadow-md);
+            margin-bottom: 1.5rem;
+        }
+
+        .dossier-bottle-stage {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 50% 55%, rgba(212, 175, 55, 0.12) 0%, transparent 70%);
+            border-radius: 16px;
+            padding: 1rem 0.5rem;
+        }
+
+        .dossier-bottle-stage .bottle-visual-frame {
+            height: clamp(230px, 34vw, 340px);
+        }
+
+        .dossier-producer {
+            font-family: var(--atlas-font-ui);
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--atlas-gold-soft);
+            margin-bottom: 0.35rem;
+        }
+
+        .dossier-name {
+            font-family: var(--atlas-font-display);
+            font-size: clamp(1.55rem, 3.4vw, 2.45rem);
+            font-weight: 600;
+            line-height: 1.15;
+            color: var(--atlas-ivory);
+            margin-bottom: 0.45rem;
+        }
+
+        .dossier-origin-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            font-family: var(--atlas-font-ui);
+            font-size: 0.82rem;
+            color: var(--atlas-muted);
+            margin-bottom: 0.9rem;
+        }
+
+        .dossier-origin-link {
+            color: var(--atlas-gold-soft);
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(212, 175, 55, 0.45);
+        }
+
+        .dossier-origin-link:hover { color: var(--atlas-gold); }
+
+        .dossier-desc {
+            font-family: var(--atlas-font-editorial);
+            font-size: clamp(1.1rem, 1.6vw, 1.28rem);
+            line-height: 1.55;
+            color: rgba(245, 240, 230, 0.9);
+            margin-bottom: 1.15rem;
+        }
+
+        .dossier-price-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.16);
+        }
+
+        .dossier-prices {
+            display: flex;
+            align-items: baseline;
+            gap: 1.25rem;
+        }
+
+        .dossier-price-main {
+            font-family: var(--atlas-font-display);
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--atlas-gold);
+        }
+
+        .dossier-price-sub {
+            font-family: var(--atlas-font-ui);
+            font-size: 0.85rem;
+            color: var(--atlas-muted);
+        }
+
+        .dossier-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .dossier-card {
+            background: linear-gradient(165deg, rgba(24, 21, 18, 0.94) 0%, rgba(15, 13, 11, 0.98) 100%);
+            border: 1px solid var(--atlas-border);
+            border-radius: 16px;
+            padding: 1.35rem 1.5rem;
+        }
+
+        .dossier-card h2 {
+            font-family: var(--atlas-font-display);
+            font-size: 0.96rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--atlas-gold-soft);
+            margin-bottom: 1rem;
+            padding-bottom: 0.55rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.14);
+        }
+
+        .tasting-row {
+            margin-bottom: 0.85rem;
+        }
+        .tasting-row:last-child { margin-bottom: 0; }
+        .tasting-label {
+            font-family: var(--atlas-font-ui);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--atlas-gold);
+            margin-bottom: 0.2rem;
+        }
+        .tasting-text {
+            font-family: var(--atlas-font-editorial);
+            font-size: 1.08rem;
+            line-height: 1.45;
+            color: var(--atlas-ivory);
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.9rem;
+        }
+
+        .spec-item {
+            background: rgba(11, 10, 9, 0.55);
+            border: 1px solid rgba(212, 175, 55, 0.12);
+            border-radius: 10px;
+            padding: 0.7rem 0.85rem;
+        }
+
+        .spec-item--wide { grid-column: 1 / -1; }
+
+        .body-meter {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.35rem;
+            margin-top: 0.4rem;
+        }
+        .body-seg {
+            height: 6px;
+            border-radius: 999px;
+            background: rgba(212, 175, 55, 0.15);
+        }
+        .body-seg.filled { background: var(--atlas-gold); }
+
+        @media (max-width: 780px) {
+            .dossier-hero {
+                grid-template-columns: 112px 1fr;
+                gap: 1rem;
+                align-items: start;
+            }
+            .dossier-bottle-stage .bottle-visual-frame { height: 210px; }
+            .dossier-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body data-page-title="Wine Dossier">
+    <header class="atlas-topbar">
+        <a href="./index.html" class="atlas-brand-link">
+            <span class="atlas-crest-badge"><img src="./image/crest.svg" alt="Cellar Crest"></span>
+            <span class="atlas-brand-text">
+                <span class="atlas-brand-name" data-brand="venueName">Atelier Cellar</span>
+                <span class="atlas-brand-sub">Sommelier Dossier</span>
+            </span>
+        </a>
+        <nav class="atlas-nav-links" id="atlasNavLinks">
+            <a href="./wine-map.html" class="atlas-nav-pill">&larr; World Atlas</a>
+            <a href="./WineByTheGlass.html" class="atlas-nav-pill">By the Glass</a>
+            <a href="./regions.html" class="atlas-nav-pill">Regions</a>
+            <a href="./wine-comparison.html" class="atlas-nav-pill">
+                Compare <span class="compare-badge" data-compare-count style="display:none;">0</span>
+            </a>
+        </nav>
+        <button type="button" class="atlas-mobile-menu-btn" id="mobileNavToggle" aria-label="Menu">
+            <svg class="atlas-ico" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+    </header>
+
+    <main class="dossier-shell" id="dossierRoot">
+        <div class="editorial-panel" style="text-align:center;padding:3rem;">Loading wine dossier...</div>
+    </main>
+
+    <script src="./js/world-atlas-data.js"></script>
+    <script src="./js/brand.js"></script>
+    <script src="./js/bottle-visual.js"></script>
+    <script src="./js/cellar-store.js"></script>
+    <script>
+        (async function initDossier() {
+            await window.AtlasBrand.ready;
+            const store = window.AtlasStore;
+            store.updateCompareBadges();
+
+            const mobBtn = document.getElementById('mobileNavToggle');
+            const nav = document.getElementById('atlasNavLinks');
+            if (mobBtn && nav) mobBtn.addEventListener('click', () => nav.classList.toggle('is-mobile-open'));
+
+            const wines = await store.loadWines();
+            const params = new URLSearchParams(window.location.search);
+            const wineNum = params.get('wine') || params.get('id');
+            const wine = wines.find(w => String(w.wine_number) === String(wineNum)) || wines[0];
+            const root = document.getElementById('dossierRoot');
+
+            if (!wine) {
+                root.innerHTML = `<div class="editorial-panel" style="text-align:center;"><h2>Wine not found</h2><a href="./wine-map.html" class="atlas-btn atlas-btn--primary" style="margin-top:1rem;">Return to World Atlas</a></div>`;
+                return;
+            }
+
+            document.title = `${wine.wine_name} — ${window.AtlasBrand.get().venueName}`;
+            const countryName = store.getCountryDisplayName(wine.country);
+            const regionName = store.getRegionDisplayName(wine.country, wine.region);
+            const bottlePrice = window.AtlasBrand.formatPrice(wine.wine_price_bottle || wine.wine_price);
+            const glassPrice = wine.hasGlass ? window.AtlasBrand.formatPrice(wine.wine_price_glass) : '';
+            const isCompared = store.getCompareIds().includes(String(wine.wine_number));
+            const bodyLevel = wine.bodyMood === 'light-refreshing' ? 1 : (wine.bodyMood === 'rich-powerful' ? 3 : 2);
+
+            const related = wines.filter(w => w.wine_number !== wine.wine_number && (w.region === wine.region || w.country === wine.country)).slice(0, 3);
+
+            root.innerHTML = `
+                <div style="margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.65rem;">
+                    <a href="./wine-map.html?country=${encodeURIComponent(wine.country)}&region=${encodeURIComponent(wine.region)}" class="atlas-btn">&larr; ${store.escapeHtml(regionName)} Wines</a>
+                    <span style="font-family:var(--atlas-font-ui);font-size:0.75rem;color:var(--atlas-muted);letter-spacing:0.12em;">CELLAR #${store.escapeHtml(wine.wine_number)}</span>
+                </div>
+
+                <section class="dossier-hero">
+                    <div class="dossier-bottle-stage">
+                        ${window.AtlasBottle.renderHtml(wine)}
+                    </div>
+                    <div>
+                        <div style="display:flex;gap:0.45rem;flex-wrap:wrap;margin-bottom:0.65rem;">
+                            <span class="wine-style-badge wine-style-badge--${store.escapeHtml(wine.style)}">
+                                <span class="style-dot style-dot--${store.escapeHtml(wine.style)}"></span>
+                                ${store.escapeHtml(store.STYLE_META[wine.style]?.label || wine.style)}
+                            </span>
+                            ${wine.organic ? '<span class="organic-badge">Organic / Biodynamic</span>' : ''}
+                            <span class="wine-style-badge">${store.escapeHtml(wine.world)}</span>
+                        </div>
+                        <div class="dossier-producer">${store.escapeHtml(wine.wine_producer)}</div>
+                        <h1 class="dossier-name">${store.escapeHtml(wine.wine_name)}</h1>
+                        <div class="dossier-origin-row">
+                            <a class="dossier-origin-link" href="./wine-map.html?country=${encodeURIComponent(wine.country)}">${store.escapeHtml(countryName)}</a>
+                            <span>&rsaquo;</span>
+                            <a class="dossier-origin-link" href="./wine-map.html?country=${encodeURIComponent(wine.country)}&region=${encodeURIComponent(wine.region)}">${store.escapeHtml(regionName)}</a>
+                            ${wine.appellation ? `<span>&middot; ${store.escapeHtml(wine.appellation)}</span>` : ''}
+                            ${wine.vintage ? `<span>&middot; Vintage ${store.escapeHtml(wine.vintage)}</span>` : ''}
+                        </div>
+                        <p class="dossier-desc">${store.escapeHtml(wine.wine_description || '')}</p>
+                        <div class="dossier-price-bar">
+                            <div class="dossier-prices">
+                                <span class="dossier-price-main">${store.escapeHtml(bottlePrice)} <small style="font-size:0.72rem;font-family:var(--atlas-font-ui);color:var(--atlas-muted);font-weight:400;">/ bottle</small></span>
+                                ${glassPrice ? `<span class="dossier-price-sub">By the Glass: <strong style="color:var(--atlas-gold-soft);">${store.escapeHtml(glassPrice)}</strong></span>` : ''}
+                            </div>
+                            <div style="display:flex;gap:0.55rem;flex-wrap:wrap;">
+                                <button type="button" class="atlas-btn ${isCompared ? 'atlas-btn--primary' : ''}" id="dossierCompareBtn">
+                                    ${isCompared ? 'In Comparison ✓' : '+ Add to Compare'}
+                                </button>
+                                <button type="button" class="atlas-btn" id="dossierShareBtn">Share Wine</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="dossier-grid">
+                    <div class="dossier-card">
+                        <h2>Sensory Tasting Notes</h2>
+                        <div class="tasting-row">
+                            <div class="tasting-label">Appearance</div>
+                            <div class="tasting-text">${store.escapeHtml(wine.tasting_notes?.visual || 'Luminous and expressive in the glass.')}</div>
+                        </div>
+                        <div class="tasting-row">
+                            <div class="tasting-label">Aromatics (Nose)</div>
+                            <div class="tasting-text">${store.escapeHtml(wine.tasting_notes?.olfactory || 'Layered fruit, floral lift, and terroir nuance.')}</div>
+                        </div>
+                        <div class="tasting-row">
+                            <div class="tasting-label">Palate &amp; Finish</div>
+                            <div class="tasting-text">${store.escapeHtml(wine.tasting_notes?.gustatory || 'Balanced acidity, poised texture, and clean persistence.')}</div>
+                        </div>
+                        <div class="tasting-row" style="padding-top:0.75rem;border-top:1px solid rgba(212,175,55,0.12);">
+                            <div class="tasting-label">Body Weight &mdash; ${store.escapeHtml(wine.body || 'Medium')}</div>
+                            <div class="body-meter" aria-label="Body weight ${bodyLevel} of 3">
+                                <div class="body-seg ${bodyLevel >= 1 ? 'filled' : ''}"></div>
+                                <div class="body-seg ${bodyLevel >= 2 ? 'filled' : ''}"></div>
+                                <div class="body-seg ${bodyLevel >= 3 ? 'filled' : ''}"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dossier-card">
+                        <h2>Terroir &amp; Vinification</h2>
+                        <div class="specs-grid">
+                            <div class="spec-item spec-item--wide">
+                                <div class="tasting-label">Grape Varietals</div>
+                                <div class="tasting-text">${store.escapeHtml(wine.varietals || '—')}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="tasting-label">Soil Composition</div>
+                                <div class="tasting-text">${store.escapeHtml(wine.soil || '—')}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="tasting-label">Elevation</div>
+                                <div class="tasting-text">${store.escapeHtml(wine.elevation || '—')}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="tasting-label">Élevage / Aging</div>
+                                <div class="tasting-text">${store.escapeHtml(wine.aging || '—')}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="tasting-label">Alcohol</div>
+                                <div class="tasting-text">${store.escapeHtml(wine.alcohol || '—')}</div>
+                            </div>
+                            ${wine.food_pairing ? `
+                            <div class="spec-item spec-item--wide">
+                                <div class="tasting-label">Sommelier Culinary Pairings</div>
+                                <div class="tasting-text">${store.escapeHtml(wine.food_pairing)}</div>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                </section>
+
+                ${related.length ? `
+                <section>
+                    <h2 style="font-family:var(--atlas-font-display);font-size:1.15rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--atlas-gold-soft);margin-bottom:1rem;">More from ${store.escapeHtml(countryName)}</h2>
+                    <div class="wines-cards-grid" id="relatedWinesGrid">
+                        ${related.map(w => store.renderWineCard(w)).join('')}
+                    </div>
+                </section>` : ''}
+            `;
+
+            document.getElementById('dossierCompareBtn').addEventListener('click', (e) => {
+                const res = store.toggleCompareId(wine.wine_number);
+                if (!res.full) {
+                    e.currentTarget.classList.toggle('atlas-btn--primary', res.added);
+                    e.currentTarget.textContent = res.added ? 'In Comparison ✓' : '+ Add to Compare';
+                }
+            });
+
+            document.getElementById('dossierShareBtn').addEventListener('click', async () => {
+                const shareData = {
+                    title: `${wine.wine_name} — ${wine.wine_producer}`,
+                    text: `${wine.wine_name} (${regionName}, ${countryName}) — ${wine.wine_description}`,
+                    url: window.location.href
+                };
+                if (navigator.share) {
+                    try { await navigator.share(shareData); return; } catch (_) {}
+                }
+                try {
+                    await navigator.clipboard.writeText(window.location.href);
+                    store.showToast('Wine link copied to clipboard');
+                } catch (_) {
+                    store.showToast('Copy the URL from your browser bar to share');
+                }
+            });
+
+            const relGrid = document.getElementById('relatedWinesGrid');
+            if (relGrid) {
+                relGrid.querySelectorAll('.wine-card').forEach(card => {
+                    const num = card.getAttribute('data-wine-number');
+                    card.addEventListener('click', (e) => {
+                        const cmp = e.target.closest('[data-compare-btn]');
+                        if (cmp) {
+                            e.stopPropagation();
+                            const res = store.toggleCompareId(num);
+                            if (!res.full) {
+                                cmp.classList.toggle('is-added', res.added);
+                                cmp.textContent = res.added ? 'Compared ✓' : '+ Compare';
+                            }
+                            return;
+                        }
+                        window.location.href = `./wine-details.html?wine=${encodeURIComponent(num)}`;
+                    });
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

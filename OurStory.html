@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Cellar Philosophy — Atelier Cellar</title>
+    <meta name="description" content="Our global cellar philosophy, provenance standards, and white-label hospitality curation.">
+    <link rel="icon" type="image/png" href="./image/icon-96x96.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/atlas.css">
+    <style>
+        .story-banner {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--atlas-border);
+            min-height: 280px;
+            display: flex;
+            align-items: flex-end;
+            padding: clamp(1.5rem, 4vw, 2.75rem);
+            margin-bottom: 2rem;
+            box-shadow: var(--atlas-shadow-md);
+        }
+        .story-banner img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.45);
+        }
+        .story-banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(11,10,9,0.2) 0%, rgba(11,10,9,0.9) 100%);
+        }
+        .story-banner-content {
+            position: relative;
+            z-index: 2;
+            max-width: 700px;
+        }
+        .story-prose p {
+            font-family: var(--atlas-font-editorial);
+            font-size: clamp(1.16rem, 1.8vw, 1.34rem);
+            line-height: 1.75;
+            color: rgba(245, 240, 230, 0.9);
+            margin-bottom: 1.35rem;
+        }
+        .story-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.16);
+        }
+        .stat-box {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 12px;
+            background: rgba(11, 10, 9, 0.55);
+            border: 1px solid rgba(212, 175, 55, 0.16);
+        }
+        .stat-num {
+            font-family: var(--atlas-font-display);
+            font-size: 1.85rem;
+            color: var(--atlas-gold);
+        }
+        .stat-lbl {
+            font-family: var(--atlas-font-ui);
+            font-size: 0.72rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--atlas-muted);
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body data-page-title="Cellar Philosophy">
+    <header class="atlas-topbar">
+        <a href="./index.html" class="atlas-brand-link">
+            <span class="atlas-crest-badge"><img src="./image/crest.svg" alt="Cellar Crest"></span>
+            <span class="atlas-brand-text">
+                <span class="atlas-brand-name" data-brand="venueName">Atelier Cellar</span>
+                <span class="atlas-brand-sub">Cellar Philosophy</span>
+            </span>
+        </a>
+        <nav class="atlas-nav-links" id="atlasNavLinks">
+            <a href="./index.html" class="atlas-nav-pill">Home</a>
+            <a href="./wine-map.html" class="atlas-nav-pill">World Atlas</a>
+            <a href="./WineByTheGlass.html" class="atlas-nav-pill">By the Glass</a>
+            <a href="./OurStory.html" class="atlas-nav-pill is-active">Philosophy</a>
+            <a href="./cellar-manager.html" class="atlas-nav-pill">Manager</a>
+        </nav>
+        <button type="button" class="atlas-mobile-menu-btn" id="mobileNavToggle" aria-label="Menu">
+            <svg class="atlas-ico" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+    </header>
+
+    <main class="editorial-container" style="max-width:960px;">
+        <section class="story-banner">
+            <picture>
+                <source srcset="./image/cellar-hero.webp" type="image/webp">
+                <img src="./image/cellar-hero.jpg" alt="Candlelit wine cellar">
+            </picture>
+            <div class="story-banner-content">
+                <p class="editorial-kicker" data-brand="storyEyebrow">Cellar Philosophy</p>
+                <h1 class="editorial-title" style="text-align:left;" data-brand="storyTitle">Curated Across Latitudes &amp; Vintages</h1>
+            </div>
+        </section>
+
+        <article class="editorial-panel">
+            <div class="story-prose" id="storyParagraphs"></div>
+            <div class="story-stats" id="storyStats"></div>
+            <div style="margin-top:2rem;display:flex;gap:0.85rem;flex-wrap:wrap;justify-content:center;">
+                <a href="./wine-map.html" class="atlas-btn atlas-btn--primary">Explore the World Atlas &rarr;</a>
+                <a href="./cellar-manager.html" class="atlas-btn">Customize White-Label Branding</a>
+            </div>
+        </article>
+    </main>
+
+    <script src="./js/world-atlas-data.js"></script>
+    <script src="./js/brand.js"></script>
+    <script src="./js/cellar-store.js"></script>
+    <script>
+        (async function initStory() {
+            const brand = await window.AtlasBrand.ready;
+            const store = window.AtlasStore;
+            const mobBtn = document.getElementById('mobileNavToggle');
+            const nav = document.getElementById('atlasNavLinks');
+            if (mobBtn && nav) mobBtn.addEventListener('click', () => nav.classList.toggle('is-mobile-open'));
+
+            const prose = document.getElementById('storyParagraphs');
+            const paragraphs = Array.isArray(brand.storyParagraphs) ? brand.storyParagraphs : [];
+            prose.innerHTML = paragraphs.map(p => `<p>${store.escapeHtml(p)}</p>`).join('');
+
+            const wines = await store.loadWines();
+            const countries = new Set(wines.map(w => w.country));
+            const regions = new Set(wines.map(w => `${w.country}:${w.region}`));
+            const organicCount = wines.filter(w => w.organic).length;
+
+            document.getElementById('storyStats').innerHTML = `
+                <div class="stat-box"><div class="stat-num">${wines.length}</div><div class="stat-lbl">Curated Bottles</div></div>
+                <div class="stat-box"><div class="stat-num">${countries.size}</div><div class="stat-lbl">Wine Countries</div></div>
+                <div class="stat-box"><div class="stat-num">${regions.size}</div><div class="stat-lbl">Active Regions</div></div>
+                <div class="stat-box"><div class="stat-num">${organicCount}</div><div class="stat-lbl">Organic &amp; Bio</div></div>
+            `;
+        })();
+    </script>
+</body>
+</html>

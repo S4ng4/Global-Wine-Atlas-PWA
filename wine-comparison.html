@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Wine Comparison — Atelier Cellar</title>
+    <meta name="description" content="Compare up to three global wines side-by-side across country, region, grape varietals, palate body, aging, and price.">
+    <link rel="icon" type="image/png" href="./image/icon-96x96.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/atlas.css">
+    <style>
+        .compare-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .compare-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.2rem;
+        }
+        .compare-col {
+            background: linear-gradient(165deg, rgba(26, 23, 20, 0.96) 0%, rgba(14, 12, 10, 0.98) 100%);
+            border: 1px solid var(--atlas-border);
+            border-radius: 16px;
+            padding: 1.35rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        .compare-bottle-head {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+        }
+        .compare-bottle-head .bottle-visual-frame {
+            width: 68px;
+            height: 140px;
+            flex-shrink: 0;
+        }
+        .compare-row {
+            padding-top: 0.65rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.12);
+        }
+        .compare-label {
+            font-family: var(--atlas-font-ui);
+            font-size: 0.66rem;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--atlas-gold);
+            margin-bottom: 2px;
+        }
+        .compare-val {
+            font-family: var(--atlas-font-editorial);
+            font-size: 1.05rem;
+            line-height: 1.38;
+            color: var(--atlas-ivory);
+        }
+    </style>
+</head>
+<body data-page-title="Wine Comparison">
+    <header class="atlas-topbar">
+        <a href="./index.html" class="atlas-brand-link">
+            <span class="atlas-crest-badge"><img src="./image/crest.svg" alt="Cellar Crest"></span>
+            <span class="atlas-brand-text">
+                <span class="atlas-brand-name" data-brand="venueName">Atelier Cellar</span>
+                <span class="atlas-brand-sub">Side-by-Side Comparison</span>
+            </span>
+        </a>
+        <nav class="atlas-nav-links" id="atlasNavLinks">
+            <a href="./index.html" class="atlas-nav-pill">Home</a>
+            <a href="./wine-map.html" class="atlas-nav-pill">World Atlas</a>
+            <a href="./WineByTheGlass.html" class="atlas-nav-pill">By the Glass</a>
+            <a href="./regions.html" class="atlas-nav-pill">Regions</a>
+            <a href="./wine-comparison.html" class="atlas-nav-pill is-active">Compare</a>
+        </nav>
+        <button type="button" class="atlas-mobile-menu-btn" id="mobileNavToggle" aria-label="Menu">
+            <svg class="atlas-ico" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+    </header>
+
+    <main class="editorial-container">
+        <section class="editorial-hero">
+            <p class="editorial-kicker">Sommelier Tasting Flight</p>
+            <h1 class="editorial-title">Compare Global Wines</h1>
+            <div class="gold-divider" aria-hidden="true"><span class="gold-diamond"></span></div>
+            <p class="editorial-lead">Contrast up to three selections across Old World and New World terroirs — grape varietals, soil, elevation, body weight, aging, and tasting notes.</p>
+        </section>
+
+        <div class="compare-toolbar">
+            <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;flex:1;">
+                <select id="addWineSelect" class="atlas-select" style="min-width:260px;max-width:100%;" aria-label="Add a wine to comparison">
+                    <option value="">+ Add a bottle to compare...</option>
+                </select>
+                <button type="button" class="atlas-btn atlas-btn--primary" id="addWineBtn">Add to Table</button>
+                <button type="button" class="atlas-btn" id="sampleFlightBtn">Load Sample Flight (FR · US · CL)</button>
+            </div>
+            <button type="button" class="atlas-btn" id="clearCompareBtn">Clear All</button>
+        </div>
+
+        <section class="compare-grid" id="compareGrid"></section>
+    </main>
+
+    <script src="./js/world-atlas-data.js"></script>
+    <script src="./js/brand.js"></script>
+    <script src="./js/bottle-visual.js"></script>
+    <script src="./js/cellar-store.js"></script>
+    <script>
+        (async function initCompare() {
+            await window.AtlasBrand.ready;
+            const store = window.AtlasStore;
+
+            const mobBtn = document.getElementById('mobileNavToggle');
+            const nav = document.getElementById('atlasNavLinks');
+            if (mobBtn && nav) mobBtn.addEventListener('click', () => nav.classList.toggle('is-mobile-open'));
+
+            const allWines = await store.loadWines();
+            const sel = document.getElementById('addWineSelect');
+
+            [...allWines]
+                .sort((a, b) => (a.country + a.wine_name).localeCompare(b.country + b.wine_name))
+                .forEach(w => {
+                    const opt = document.createElement('option');
+                    opt.value = w.wine_number;
+                    opt.textContent = `[${store.getCountryDisplayName(w.country)}] ${w.wine_producer} — ${w.wine_name} (${window.AtlasBrand.formatPrice(w.wine_price)})`;
+                    sel.appendChild(opt);
+                });
+
+            function render() {
+                const ids = store.getCompareIds();
+                const selected = ids.map(id => allWines.find(w => String(w.wine_number) === String(id))).filter(Boolean);
+                const grid = document.getElementById('compareGrid');
+
+                if (selected.length === 0) {
+                    grid.innerHTML = `
+                        <div class="editorial-panel" style="grid-column:1/-1;text-align:center;padding:3rem 1.5rem;">
+                            <h2 style="font-family:var(--atlas-font-display);color:var(--atlas-gold-soft);margin-bottom:0.5rem;">Your Tasting Table is Empty</h2>
+                            <p style="color:var(--atlas-muted);margin-bottom:1.25rem;">Pick wines from the dropdown above, click "+ Compare" on any bottle in the World Atlas, or load a curated 3-continent Cabernet flight.</p>
+                            <button type="button" class="atlas-btn atlas-btn--primary" id="emptySampleBtn">Load Sample Global Flight</button>
+                        </div>`;
+                    const btn = document.getElementById('emptySampleBtn');
+                    if (btn) btn.addEventListener('click', loadSampleFlight);
+                    return;
+                }
+
+                grid.innerHTML = selected.map(w => `
+                    <article class="compare-col">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <span class="wine-style-badge wine-style-badge--${store.escapeHtml(w.style)}">${store.escapeHtml(store.STYLE_META[w.style]?.label || w.style)}</span>
+                            <button type="button" class="atlas-btn" data-remove-compare="${store.escapeHtml(w.wine_number)}" style="padding:0.25rem 0.65rem;font-size:0.72rem;">Remove</button>
+                        </div>
+                        <div class="compare-bottle-head">
+                            ${window.AtlasBottle.renderHtml(w)}
+                            <div>
+                                <div class="wine-card-producer">${store.escapeHtml(w.wine_producer)}</div>
+                                <h2 style="font-family:var(--atlas-font-display);font-size:1.12rem;color:var(--atlas-ivory);margin:2px 0;">${store.escapeHtml(w.wine_name)}</h2>
+                                <div style="font-family:var(--atlas-font-ui);font-size:0.76rem;color:var(--atlas-muted);">${store.escapeHtml(store.getRegionDisplayName(w.country, w.region))}, ${store.escapeHtml(store.getCountryDisplayName(w.country))}</div>
+                                <div style="font-family:var(--atlas-font-display);font-size:1.2rem;color:var(--atlas-gold);margin-top:6px;">${window.AtlasBrand.formatPrice(w.wine_price_bottle || w.wine_price)}</div>
+                            </div>
+                        </div>
+                        <div class="compare-row"><div class="compare-label">Appellation &amp; Vintage</div><div class="compare-val">${store.escapeHtml(w.appellation || '—')} (${store.escapeHtml(w.vintage || 'NV')})</div></div>
+                        <div class="compare-row"><div class="compare-label">Grape Varietals</div><div class="compare-val">${store.escapeHtml(w.varietals || '—')}</div></div>
+                        <div class="compare-row"><div class="compare-label">Palate Body &amp; Alcohol</div><div class="compare-val">${store.escapeHtml(w.body || 'Medium')} &middot; ${store.escapeHtml(w.alcohol || '—')}</div></div>
+                        <div class="compare-row"><div class="compare-label">Soil &amp; Elevation</div><div class="compare-val">${store.escapeHtml(w.soil || '—')} (${store.escapeHtml(w.elevation || '—')})</div></div>
+                        <div class="compare-row"><div class="compare-label">Aging</div><div class="compare-val">${store.escapeHtml(w.aging || '—')}</div></div>
+                        <div class="compare-row"><div class="compare-label">Aromatics &amp; Palate</div><div class="compare-val">${store.escapeHtml(w.tasting_notes?.olfactory || '')} ${store.escapeHtml(w.tasting_notes?.gustatory || '')}</div></div>
+                        <div class="compare-row"><div class="compare-label">Culinary Pairing</div><div class="compare-val">${store.escapeHtml(w.food_pairing || '—')}</div></div>
+                        <a href="./wine-details.html?wine=${encodeURIComponent(w.wine_number)}" class="atlas-btn" style="margin-top:auto;">Open Full Dossier &rarr;</a>
+                    </article>
+                `).join('');
+
+                grid.querySelectorAll('[data-remove-compare]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        store.toggleCompareId(btn.getAttribute('data-remove-compare'));
+                        render();
+                    });
+                });
+            }
+
+            function loadSampleFlight() {
+                store.clearCompare();
+                ['106', '401', '501'].forEach(id => {
+                    if (allWines.some(w => String(w.wine_number) === id)) store.toggleCompareId(id);
+                });
+                render();
+            }
+
+            document.getElementById('addWineBtn').addEventListener('click', () => {
+                if (!sel.value) return;
+                store.toggleCompareId(sel.value);
+                sel.value = '';
+                render();
+            });
+            document.getElementById('sampleFlightBtn').addEventListener('click', loadSampleFlight);
+            document.getElementById('clearCompareBtn').addEventListener('click', () => { store.clearCompare(); render(); });
+
+            render();
+        })();
+    </script>
+</body>
+</html>

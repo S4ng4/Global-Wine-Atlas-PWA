@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Atelier Cellar — Global Wine Cellar Atlas</title>
+    <meta name="description" content="White-label interactive global wine cellar atlas exploring the world's finest wine regions across France, Italy, Spain, California, Chile, Argentina, Australia, and beyond.">
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0B0A09">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Wine Atlas">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" sizes="180x180" href="./image/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./image/icon-96x96.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/atlas.css">
+
+    <style>
+        .landing-shell {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            isolation: isolate;
+        }
+
+        .landing-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .landing-backdrop img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 45%;
+            filter: brightness(0.42) saturate(0.92) contrast(1.06);
+            transform: scale(1.03);
+        }
+
+        .landing-backdrop::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 50% 24%, rgba(212, 175, 55, 0.12) 0%, transparent 56%),
+                linear-gradient(180deg, rgba(11, 10, 9, 0.68) 0%, rgba(11, 10, 9, 0.84) 55%, rgba(11, 10, 9, 0.97) 100%);
+        }
+
+        .landing-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.1rem clamp(1.25rem, 4vw, 3rem);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.14);
+            background: rgba(11, 10, 9, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .topbar-location {
+            font-family: var(--atlas-font-ui);
+            font-size: 0.72rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--atlas-muted);
+        }
+
+        .topbar-links {
+            display: flex;
+            align-items: center;
+            gap: 1.3rem;
+        }
+
+        .topbar-link {
+            font-family: var(--atlas-font-ui);
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--atlas-muted);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .topbar-link:hover { color: var(--atlas-gold-soft); }
+
+        .landing-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(2rem, 5vh, 3.8rem) clamp(1.25rem, 4vw, 2.5rem) 2.5rem;
+            width: 100%;
+            max-width: 1140px;
+            margin: 0 auto;
+        }
+
+        .brand-crest-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: clamp(1.8rem, 4.2vh, 3rem);
+            animation: atlasReveal 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .brand-crest {
+            height: clamp(68px, 8vw, 90px);
+            width: auto;
+            margin-bottom: 1.2rem;
+            opacity: 0.96;
+        }
+
+        .brand-kicker {
+            font-family: var(--atlas-font-ui);
+            font-size: 0.73rem;
+            font-weight: 500;
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+            color: var(--atlas-gold-soft);
+            margin-bottom: 0.7rem;
+        }
+
+        .brand-heading {
+            font-family: var(--atlas-font-display);
+            font-size: clamp(2rem, 4.5vw, 3.35rem);
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--atlas-ivory);
+            line-height: 1.12;
+        }
+
+        .brand-lead {
+            font-family: var(--atlas-font-editorial);
+            font-size: clamp(1.12rem, 1.7vw, 1.32rem);
+            color: rgba(245, 240, 230, 0.88);
+            max-width: 650px;
+            line-height: 1.55;
+        }
+
+        .experience-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1.35rem;
+            width: 100%;
+            margin-bottom: 2.1rem;
+            animation: atlasReveal 0.85s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .experience-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1.25rem;
+            padding: 1.85rem 1.7rem;
+            border-radius: 16px;
+            background: linear-gradient(160deg, rgba(26, 23, 20, 0.9) 0%, rgba(15, 13, 11, 0.95) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.22);
+            box-shadow: 0 14px 36px rgba(0, 0, 0, 0.48);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            text-decoration: none;
+            color: var(--atlas-ivory);
+            transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.28s ease, box-shadow 0.28s ease;
+        }
+
+        .experience-card.is-featured {
+            background: linear-gradient(160deg, rgba(44, 35, 22, 0.92) 0%, rgba(20, 17, 13, 0.96) 100%);
+            border-color: rgba(212, 175, 55, 0.48);
+        }
+
+        .experience-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--atlas-gold);
+            box-shadow: 0 22px 48px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(212, 175, 55, 0.25);
+        }
+
+        .card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .card-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.28);
+            color: var(--atlas-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background-color 0.25s ease, transform 0.25s ease;
+        }
+
+        .experience-card:hover .card-icon-box {
+            background: rgba(212, 175, 55, 0.2);
+            transform: scale(1.06);
+        }
+
+        .card-icon-box svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.65;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .card-metric {
+            font-family: var(--atlas-font-ui);
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--atlas-gold-soft);
+            padding: 0.3rem 0.65rem;
+            border-radius: 999px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.24);
+            white-space: nowrap;
+        }
+
+        .card-title {
+            font-family: var(--atlas-font-display);
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            color: var(--atlas-ivory);
+            margin-bottom: 0.45rem;
+            transition: color 0.2s ease;
+        }
+
+        .experience-card:hover .card-title { color: var(--atlas-gold-soft); }
+
+        .card-desc {
+            font-family: var(--atlas-font-editorial);
+            font-size: 1.06rem;
+            line-height: 1.5;
+            color: var(--atlas-muted);
+        }
+
+        .card-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--atlas-font-ui);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--atlas-gold);
+            padding-top: 0.85rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.14);
+        }
+
+        .card-cta svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            transition: transform 0.22s ease;
+        }
+
+        .experience-card:hover .card-cta svg { transform: translateX(4px); }
+
+        .secondary-strip {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            width: 100%;
+            animation: atlasReveal 0.9s 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .secondary-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.52rem;
+            padding: 0.62rem 1.15rem;
+            border-radius: 999px;
+            background: rgba(20, 18, 16, 0.78);
+            border: 1px solid rgba(212, 175, 55, 0.22);
+            color: var(--atlas-ivory);
+            font-family: var(--atlas-font-ui);
+            font-size: 0.79rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .secondary-link svg {
+            width: 15px;
+            height: 15px;
+            stroke: var(--atlas-gold);
+            fill: none;
+            stroke-width: 1.8;
+        }
+
+        .secondary-link:hover {
+            border-color: var(--atlas-gold);
+            background: rgba(212, 175, 55, 0.12);
+            color: var(--atlas-gold-soft);
+            transform: translateY(-2px);
+        }
+
+        .landing-footer {
+            border-top: 1px solid rgba(212, 175, 55, 0.14);
+            background: rgba(9, 8, 7, 0.88);
+            padding: 1.35rem clamp(1.25rem, 4vw, 3rem);
+            text-align: center;
+        }
+
+        .footer-tagline {
+            font-family: var(--atlas-font-display);
+            font-size: 0.78rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--atlas-gold);
+            margin-bottom: 0.4rem;
+        }
+
+        .footer-address {
+            font-family: var(--atlas-font-ui);
+            font-size: 0.76rem;
+            color: var(--atlas-muted);
+            letter-spacing: 0.04em;
+        }
+
+        @keyframes atlasReveal {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 900px) {
+            .experience-grid { grid-template-columns: 1fr; max-width: 560px; }
+            .topbar-links { display: none; }
+            .landing-topbar { justify-content: center; }
+        }
+    </style>
+</head>
+<body data-page-title="Global Wine Cellar Atlas">
+    <div class="landing-shell">
+        <div class="landing-backdrop" aria-hidden="true">
+            <picture>
+                <source srcset="./image/cellar-hero.webp" type="image/webp">
+                <img src="./image/cellar-hero.jpg" alt="" decoding="async">
+            </picture>
+        </div>
+
+        <header class="landing-topbar">
+            <span class="topbar-location" data-brand="location">White-Label Hospitality Edition &middot; Customizable Venue</span>
+            <nav class="topbar-links" aria-label="Quick navigation">
+                <a href="./wine-map.html" class="topbar-link">World Atlas</a>
+                <a href="./WineByTheGlass.html" class="topbar-link">By the Glass</a>
+                <a href="./regions.html" class="topbar-link">Regions</a>
+                <a href="./SparklingWineDoc.html" class="topbar-link">Sparkling Guide</a>
+                <a href="./cellar-manager.html" class="topbar-link">White-Label Manager</a>
+            </nav>
+        </header>
+
+        <main class="landing-main">
+            <section class="brand-crest-wrap">
+                <img src="./image/crest.svg" alt="Wine Cellar Crest" class="brand-crest" decoding="async">
+                <p class="brand-kicker" data-brand="venueKicker">Curated Cellar &middot; Global Terroirs &middot; Sommelier Selection</p>
+                <h1 class="brand-heading" data-brand="venueName">Atelier Cellar</h1>
+                <div class="gold-divider" aria-hidden="true"><span class="gold-diamond"></span></div>
+                <p class="brand-lead" data-brand="heroLead">
+                    An interactive cellar journey across the world's great wine regions — from Bordeaux, Piedmont, and Rioja to Napa Valley, Mendoza, Chile, and Marlborough.
+                </p>
+            </section>
+
+            <section class="experience-grid" aria-label="Primary cellar experiences">
+                <!-- 1. World Wine Atlas -->
+                <a href="./wine-map.html" class="experience-card is-featured">
+                    <div>
+                        <div class="card-top">
+                            <div class="card-icon-box" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                </svg>
+                            </div>
+                            <span class="card-metric" id="metricCellarCount">Global Cellar</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Explore World Atlas</h2>
+                        <p class="card-desc">Navigate interactive maps of France, Italy, Spain, California, Chile, Argentina, Australia &amp; more by region, style, varietal, or palate.</p>
+                    </div>
+                    <span class="card-cta">
+                        Open Interactive Atlas
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </span>
+                </a>
+
+                <!-- 2. Wine by the Glass -->
+                <a href="./WineByTheGlass.html" class="experience-card">
+                    <div>
+                        <div class="card-top">
+                            <div class="card-icon-box" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M8 22h8"></path>
+                                    <path d="M12 15v7"></path>
+                                    <path d="M7 2h10l-1 8a4 4 0 0 1-8 0L7 2z"></path>
+                                    <path d="M7.5 7h9"></path>
+                                </svg>
+                            </div>
+                            <span class="card-metric" id="metricGlassCount">Daily Pours</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Wine by the Glass</h2>
+                        <p class="card-desc">Discover today's curated global reds, crisp whites, dry rosés, skin-contact amber, sparkling, and zero-proof pours.</p>
+                    </div>
+                    <span class="card-cta">
+                        View Today's Pours
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </span>
+                </a>
+
+                <!-- 3. Cellar Philosophy -->
+                <a href="./OurStory.html" class="experience-card">
+                    <div>
+                        <div class="card-top">
+                            <div class="card-icon-box" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                                    <path d="M2 17l10 5 10-5"></path>
+                                    <path d="M2 12l10 5 10-5"></path>
+                                </svg>
+                            </div>
+                            <span class="card-metric" id="metricCountryCount">14 Nations</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Cellar Philosophy</h2>
+                        <p class="card-desc">Our approach to Old World classics, New World icons, sustainable estates, and effortless white-label hospitality curation.</p>
+                    </div>
+                    <span class="card-cta">
+                        Explore Our Vision
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </span>
+                </a>
+            </section>
+
+            <nav class="secondary-strip" aria-label="Sommelier tools and guides">
+                <a href="./regions.html" class="secondary-link">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                    World Regions Directory
+                </a>
+                <a href="./SparklingWineDoc.html" class="secondary-link">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    Sparkling Wine Guide
+                </a>
+                <a href="./wine-comparison.html" class="secondary-link">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="3" x2="12" y2="21"></line><path d="M5 7h14"></path><path d="M3 14l2-7 2 7a2 2 0 0 1-4 0z"></path><path d="M17 14l2-7 2 7a2 2 0 0 1-4 0z"></path></svg>
+                    Compare Wines
+                </a>
+                <a href="./cellar-manager.html" class="secondary-link">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    Cellar &amp; Brand Manager
+                </a>
+            </nav>
+        </main>
+
+        <footer class="landing-footer">
+            <p class="footer-tagline" data-brand="venueTagline">Global Wine Cellar Atlas &amp; Digital List</p>
+            <p class="footer-address" data-brand="address">120 Mercer Gallery &middot; New York, NY &middot; +1 (212) 555-0194</p>
+        </footer>
+    </div>
+
+    <script src="./js/world-atlas-data.js"></script>
+    <script src="./js/brand.js"></script>
+    <script src="./js/cellar-store.js"></script>
+    <script>
+        (async function initLanding() {
+            const wines = await window.AtlasStore.loadWines();
+            const countries = new Set(wines.map(w => w.country));
+            const glassWines = wines.filter(w => w.hasGlass);
+
+            const cellarEl = document.getElementById('metricCellarCount');
+            const glassEl = document.getElementById('metricGlassCount');
+            const countryEl = document.getElementById('metricCountryCount');
+
+            if (cellarEl && wines.length) cellarEl.textContent = `${wines.length} Selections`;
+            if (glassEl && glassWines.length) glassEl.textContent = `${glassWines.length} By the Glass`;
+            if (countryEl && countries.size) countryEl.textContent = `${countries.size} Countries`;
+
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
