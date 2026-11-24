@@ -1,9 +1,10 @@
 /**
- * Interactive Two-Level World & Country Regional Wine Atlas Map
- * Level 1: Interactive World Wine Map (14 countries / wine zones with 30°-50° wine belts)
- * Level 2: Detailed Country Regional Map drill-down (France, Italy, Spain, USA/California, Chile, etc.)
- * Features: Real-time choropleth by active filters & wine style, zoom/pan, hover tooltips,
- * terroir dossier card, keyboard accessibility, and 100% offline vector rendering.
+ * Interactive Two-Level World & Country Regional Wine Atlas Map (Mobile-First Luxury Edition)
+ * Features:
+ * - Smooth cubic-Bezier engraved cartography (24 landmass silhouettes, 14 countries, 97 wine regions)
+ * - Animated viewport focus tabs (World, Europe, Americas, South) for effortless mobile thumb tapping
+ * - Scale-aware pins, collision-free labels, generous touch hit-targets, and two-finger pinch/pan
+ * - Real-time choropleth intensity shading synced to active wine style & sommelier filters
  */
 (function (global) {
     'use strict';
@@ -16,6 +17,10 @@
         return el;
     }
 
+    function parseVB(str) {
+        return str.trim().split(/\s+/).map(Number);
+    }
+
     class WorldWineAtlasMap {
         constructor(containerEl, callbacks = {}) {
             this.container = containerEl;
@@ -26,32 +31,38 @@
 
             this.mode = 'world'; // 'world' | 'country'
             this.activeCountryId = null;
+            this.activeFocus = 'world'; // 'world' | 'europe' | 'americas' | 'southern'
             this.activeStyle = 'ALL';
             this.filteredWines = [];
+
             this.zoom = 1;
             this.panX = 0;
             this.panY = 0;
             this.isDragging = false;
             this.dragStart = { x: 0, y: 0 };
+            this.pinchDist = 0;
+            this._vbAnim = null;
+            this._currentVB = [0, 0, 1000, 500];
 
             this._buildShell();
-            this._bindZoomPan();
+            this._bindInteractions();
         }
 
         _buildShell() {
             this.container.innerHTML = `
                 <div class="map-subbar">
                     <div class="map-breadcrumbs" id="atlasBreadcrumbs"></div>
-                    <div style="display:flex;align-items:center;gap:0.65rem;flex-wrap:wrap;">
-                        <span class="map-status-text" id="atlasMapStatus">Select a country to explore its wine regions</span>
-                        <button type="button" class="atlas-btn" id="atlasViewAllCountryBtn" style="display:none;padding:0.35rem 0.8rem;font-size:0.74rem;"></button>
+                    <div class="map-focus-tabs" id="atlasFocusTabs" role="tablist" aria-label="Map region focus"></div>
+                    <div class="map-subbar-right">
+                        <span class="map-status-text" id="atlasMapStatus"></span>
+                        <button type="button" class="atlas-btn atlas-btn--sm" id="atlasViewAllCountryBtn" style="display:none;"></button>
                     </div>
                 </div>
                 <div class="map-stage-wrap" id="atlasMapStage">
                     <div class="map-zoom-controls" aria-label="Map zoom controls">
                         <button type="button" class="map-zoom-btn" data-zoom="in" title="Zoom in" aria-label="Zoom in">+</button>
                         <button type="button" class="map-zoom-btn" data-zoom="out" title="Zoom out" aria-label="Zoom out">&minus;</button>
-                        <button type="button" class="map-zoom-btn" data-zoom="reset" title="Reset view" aria-label="Reset map view">&#8634;</button>
+                        <button type="button" class="map-zoom-btn" data-zoom="reset" title="Reset view" aria-label="Reset view">&#8634;</button>
                     </div>
                     <div class="atlas-map-tooltip" id="atlasMapTooltip" aria-hidden="true"></div>
                     <div class="atlas-terroir-card" id="atlasTerroirCard"></div>
@@ -60,6 +71,7 @@
             `;
 
             this.breadcrumbsEl = this.container.querySelector('#atlasBreadcrumbs');
+            this.focusTabsEl = this.container.querySelector('#atlasFocusTabs');
             this.statusEl = this.container.querySelector('#atlasMapStatus');
             this.viewAllBtn = this.container.querySelector('#atlasViewAllCountryBtn');
             this.stageEl = this.container.querySelector('#atlasMapStage');
@@ -74,23 +86,24 @@
             this.container.querySelectorAll('.map-zoom-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const action = btn.getAttribute('data-zoom');
-                    if (action === 'in') this.setZoom(this.zoom * 1.28);
-                    else if (action === 'out') this.setZoom(this.zoom / 1.28);
+                    if (action === 'in') this.setZoom(this.zoom * 1.3);
+                    else if (action === 'out') this.setZoom(this.zoom / 1.3);
                     else this.resetView();
                 });
             });
         }
 
-        _bindZoomPan() {
+        _bindInteractions() {
+            // Wheel zoom on desktop
             this.stageEl.addEventListener('wheel', (e) => {
                 if (!this.svgEl) return;
                 e.preventDefault();
-                const factor = e.deltaY < 0 ? 1.15 : 0.87;
-                this.setZoom(this.zoom * factor);
+                this.setZoom(this.zoom * (e.deltaY < 0 ? 1.16 : 0.86));
             }, { passive: false });
 
+            // Pointer drag pan (desktop + mobile 1-finger when zoomed)
             this.stageEl.addEventListener('pointerdown', (e) => {
-                if (e.target.closest('button') || e.target.closest('.atlas-geo-shape')) return;
+                if (e.target.closest('button') || e.target.closest('.atlas-geo-shape') || e.target.closest('.atlas-country-pin')) return;
                 this.isDragging = true;
                 this.dragStart = { x: e.clientX - this.panX, y: e.clientY - this.panY };
                 this.stageEl.style.cursor = 'grabbing';
@@ -98,8 +111,9 @@
 
             window.addEventListener('pointermove', (e) => {
                 if (!this.isDragging) return;
-                this.panX = Math.max(-320, Math.min(320, e.clientX - this.dragStart.x));
-                this.panY = Math.max(-240, Math.min(240, e.clientY - this.dragStart.y));
+                const limit = 260 * this.zoom;
+                this.panX = Math.max(-limit, Math.min(limit, e.clientX - this.dragStart.x));
+                this.panY = Math.max(-limit, Math.min(limit, e.clientY - this.dragStart.y));
                 this._applyTransform();
             });
 
@@ -108,11 +122,35 @@
                 this.isDragging = false;
                 this.stageEl.style.cursor = '';
             });
+
+            // Mobile two-finger pinch zoom
+            this.stageEl.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 2) {
+                    const dx = e.touches[0].clientX - e.touches[1].clientX;
+                    const dy = e.touches[0].clientY - e.touches[1].clientY;
+                    this.pinchDist = Math.hypot(dx, dy);
+                }
+            }, { passive: true });
+
+            this.stageEl.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 2 && this.pinchDist > 0) {
+                    e.preventDefault();
+                    const dx = e.touches[0].clientX - e.touches[1].clientX;
+                    const dy = e.touches[0].clientY - e.touches[1].clientY;
+                    const dist = Math.hypot(dx, dy);
+                    const ratio = dist / this.pinchDist;
+                    this.pinchDist = dist;
+                    this.setZoom(this.zoom * ratio);
+                }
+            }, { passive: false });
+
+            this.stageEl.addEventListener('touchend', () => { this.pinchDist = 0; }, { passive: true });
         }
 
         setZoom(z) {
-            this.zoom = Math.max(1, Math.min(3.2, z));
-            if (this.zoom === 1) {
+            this.zoom = Math.max(1, Math.min(3.5, z));
+            if (this.zoom <= 1.02) {
+                this.zoom = 1;
                 this.panX = 0;
                 this.panY = 0;
             }
@@ -131,6 +169,58 @@
             this.svgEl.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom})`;
         }
 
+        _animateViewBox(targetStr, duration = 360) {
+            if (!this.svgEl) return;
+            if (this._vbAnim) cancelAnimationFrame(this._vbAnim);
+            const from = [...this._currentVB];
+            const to = parseVB(targetStr);
+            const start = performance.now();
+
+            const step = (now) => {
+                const t = Math.min(1, (now - start) / duration);
+                const ease = 1 - Math.pow(1 - t, 3);
+                const cur = from.map((v, i) => v + (to[i] - v) * ease);
+                this._currentVB = cur;
+                if (this.svgEl) {
+                    this.svgEl.setAttribute('viewBox', cur.map(n => n.toFixed(1)).join(' '));
+                }
+                if (t < 1) this._vbAnim = requestAnimationFrame(step);
+            };
+            this._vbAnim = requestAnimationFrame(step);
+        }
+
+        setFocus(focusKey) {
+            const atlas = global.WorldAtlasData;
+            if (!atlas || !atlas.focusPresets || !atlas.focusPresets[focusKey]) return;
+            this.activeFocus = focusKey;
+            this.resetView();
+            if (this.mode === 'world') {
+                const preset = atlas.focusPresets[focusKey];
+                this._renderFocusTabs(atlas);
+                this._updateWorldPinScale(focusKey);
+                this._animateViewBox(preset.viewBox, 380);
+                if (this.terroirCardEl) {
+                    this.terroirCardEl.innerHTML = `
+                        <div class="terroir-kicker">Interactive Atlas &middot; ${global.AtlasStore.escapeHtml(preset.label)}</div>
+                        <div class="terroir-title">Select a Wine Nation</div>
+                        <div class="terroir-desc">${global.AtlasStore.escapeHtml(preset.desc)}</div>
+                    `;
+                }
+            }
+        }
+
+        _updateWorldPinScale(focusKey) {
+            if (!this.svgEl) return;
+            // Scale down SVG pin/label geometry proportionally when zoomed into Europe or Americas
+            const scaleMap = { world: 1, europe: 0.34, americas: 0.62, southern: 0.68 };
+            const s = scaleMap[focusKey] || 1;
+            this.svgEl.querySelectorAll('.atlas-country-pin').forEach(g => {
+                const cx = g.getAttribute('data-cx');
+                const cy = g.getAttribute('data-cy');
+                g.setAttribute('transform', `translate(${cx}, ${cy}) scale(${s})`);
+            });
+        }
+
         updateData(filteredWines, activeStyle = 'ALL', activeCountryId = null) {
             this.filteredWines = filteredWines || [];
             this.activeStyle = activeStyle || 'ALL';
@@ -145,26 +235,13 @@
             this.render();
         }
 
-        showWorld() {
-            this.mode = 'world';
-            this.activeCountryId = null;
-            this.resetView();
-            this.render();
-        }
-
-        showCountry(countryId) {
-            this.mode = 'country';
-            this.activeCountryId = countryId;
-            this.resetView();
-            this.render();
-        }
-
         _getPalette() {
             const meta = global.AtlasStore ? global.AtlasStore.STYLE_META : {};
             return meta[this.activeStyle] || meta.ALL || { active: '#D4AF37', accent: '#E6CB78', label: 'All Wines' };
         }
 
         _showTooltip(ev, title, countText, subtitle) {
+            if (window.matchMedia('(pointer: coarse)').matches) return; // Skip hover tooltip on touch screens
             this.tooltipEl.innerHTML = `
                 <div class="tip-title">${global.AtlasStore.escapeHtml(title)}</div>
                 <div class="tip-count">${global.AtlasStore.escapeHtml(countText)}</div>
@@ -175,8 +252,8 @@
 
             if (ev && ev.clientX) {
                 const rect = this.stageEl.getBoundingClientRect();
-                const left = Math.min(rect.width - 270, Math.max(12, ev.clientX - rect.left + 16));
-                const top = Math.min(rect.height - 110, Math.max(12, ev.clientY - rect.top - 18));
+                const left = Math.min(rect.width - 275, Math.max(12, ev.clientX - rect.left + 16));
+                const top = Math.min(rect.height - 115, Math.max(12, ev.clientY - rect.top - 18));
                 this.tooltipEl.style.left = `${left}px`;
                 this.tooltipEl.style.top = `${top}px`;
             }
@@ -185,6 +262,23 @@
         _hideTooltip() {
             this.tooltipEl.classList.remove('visible');
             this.tooltipEl.setAttribute('aria-hidden', 'true');
+        }
+
+        _renderFocusTabs(atlas) {
+            if (!this.focusTabsEl) return;
+            if (this.mode !== 'world' || !atlas.focusPresets) {
+                this.focusTabsEl.style.display = 'none';
+                return;
+            }
+            this.focusTabsEl.style.display = 'inline-flex';
+            this.focusTabsEl.innerHTML = Object.entries(atlas.focusPresets).map(([key, p]) => `
+                <button type="button" class="focus-tab-btn ${this.activeFocus === key ? 'is-active' : ''}" data-focus="${key}" role="tab" aria-selected="${this.activeFocus === key}">
+                    ${global.AtlasStore.escapeHtml(p.label)}
+                </button>
+            `).join('');
+            this.focusTabsEl.querySelectorAll('[data-focus]').forEach(btn => {
+                btn.addEventListener('click', () => this.setFocus(btn.getAttribute('data-focus')));
+            });
         }
 
         render() {
@@ -206,76 +300,116 @@
         _renderWorldView(atlas) {
             const palette = this._getPalette();
             const counts = {};
-            this.filteredWines.forEach(w => {
-                counts[w.country] = (counts[w.country] || 0) + 1;
-            });
+            this.filteredWines.forEach(w => { counts[w.country] = (counts[w.country] || 0) + 1; });
             const maxCount = Math.max(1, ...Object.values(counts));
             const totalWines = this.filteredWines.length;
             const activeCountriesCount = Object.keys(counts).length;
 
-            this.breadcrumbsEl.innerHTML = `<span class="crumb-current">World Wine Atlas</span>`;
-            this.statusEl.textContent = `${palette.label} · ${totalWines} selections across ${activeCountriesCount} countries`;
+            this.breadcrumbsEl.innerHTML = `<span class="crumb-current">World Atlas</span>`;
+            this._renderFocusTabs(atlas);
+            this.statusEl.textContent = `${totalWines} wines · ${activeCountriesCount} countries`;
             this.viewAllBtn.style.display = 'none';
 
+            const preset = (atlas.focusPresets && atlas.focusPresets[this.activeFocus]) || { label: 'World', viewBox: atlas.worldViewBox, desc: 'Tap any illuminated wine nation to open its regional terroir map.' };
+            this._currentVB = parseVB(preset.viewBox);
+
             this.terroirCardEl.innerHTML = `
-                <div class="terroir-kicker">Interactive Global Cellar</div>
-                <div class="terroir-title">30&deg;&ndash;50&deg; Wine Latitudes</div>
-                <div class="terroir-desc">Click any illuminated wine nation on the atlas or quick-jump strip below to open its interactive regional map.</div>
+                <div class="terroir-kicker">Global Cellar &middot; ${global.AtlasStore.escapeHtml(preset.label)}</div>
+                <div class="terroir-title">30&deg;&ndash;50&deg; Wine Belts</div>
+                <div class="terroir-desc">${global.AtlasStore.escapeHtml(preset.desc)}</div>
             `;
 
             const svg = createEl('svg', {
                 class: 'atlas-svg-canvas',
-                viewBox: atlas.worldViewBox,
+                viewBox: preset.viewBox,
+                preserveAspectRatio: 'xMidYMid meet',
                 role: 'img',
                 'aria-label': 'Interactive World Wine Atlas Map'
             });
 
-            // Subtle wine belt lines (30°-50° N & S)
-            const belts = atlas.wineBelts;
-            const beltGroup = createEl('g');
-            [
-                { y: belts.n50, label: '50° N — COOL NORTHERN BELT' },
-                { y: belts.n30, label: '30° N — MEDITERRANEAN & CALIFORNIA BELT' },
-                { y: belts.eq,  label: 'EQUATOR' },
-                { y: belts.s30, label: '30° S — ANDES, CAPE & AUSTRALIA BELT' },
-                { y: belts.s50, label: '50° S — PATAGONIA & OTAGO BELT' }
-            ].forEach(b => {
-                beltGroup.appendChild(createEl('line', {
-                    x1: 0, y1: b.y, x2: 1000, y2: b.y, class: 'wine-belt-line'
+            // Engraved cartographic defs: ocean glow, gold land gradient, soft shadow
+            const defs = createEl('defs');
+            defs.innerHTML = `
+                <radialGradient id="atlasOceanGlow" cx="50%" cy="46%" r="58%">
+                    <stop offset="0%" stop-color="rgba(212, 175, 55, 0.085)" />
+                    <stop offset="100%" stop-color="rgba(9, 8, 7, 0)" />
+                </radialGradient>
+                <filter id="atlasLandShadow" x="-6%" y="-6%" width="112%" height="112%">
+                    <feDropShadow dx="0" dy="1.8" stdDeviation="2.2" flood-color="#000000" flood-opacity="0.65" />
+                </filter>
+            `;
+            svg.appendChild(defs);
+            svg.appendChild(createEl('rect', { x: 0, y: 0, width: 1000, height: 500, fill: 'url(#atlasOceanGlow)', 'pointer-events': 'none' }));
+
+            // Subtle Longitude Graticule (every 30 deg)
+            const grat = createEl('g', { 'pointer-events': 'none' });
+            for (let x = 83.3; x < 980; x += 83.33) {
+                grat.appendChild(createEl('line', {
+                    x1: x.toFixed(1), y1: 0, x2: x.toFixed(1), y2: 500,
+                    stroke: 'rgba(212, 175, 55, 0.055)', 'stroke-width': '0.55'
                 }));
-                const txt = createEl('text', { x: 14, y: b.y - 4, class: 'wine-belt-label' });
+            }
+            svg.appendChild(grat);
+
+            // Wine Belt Bands & Latitude Parallels (30°-50° N & S)
+            const belts = atlas.wineBelts;
+            const beltGroup = createEl('g', { 'pointer-events': 'none' });
+            beltGroup.appendChild(createEl('rect', {
+                x: 0, y: belts.n50, width: 1000, height: belts.n30 - belts.n50,
+                fill: 'rgba(212, 175, 55, 0.036)'
+            }));
+            beltGroup.appendChild(createEl('rect', {
+                x: 0, y: belts.s30, width: 1000, height: belts.s50 - belts.s30,
+                fill: 'rgba(212, 175, 55, 0.036)'
+            }));
+            [
+                { y: belts.n50, label: '50° N' },
+                { y: belts.n30, label: '30° N' },
+                { y: belts.eq,  label: '0°' },
+                { y: belts.s30, label: '30° S' },
+                { y: belts.s50, label: '50° S' }
+            ].forEach(b => {
+                beltGroup.appendChild(createEl('line', { x1: 0, y1: b.y, x2: 1000, y2: b.y, class: 'wine-belt-line' }));
+                const txt = createEl('text', { x: 10, y: b.y - 3, class: 'wine-belt-label' });
                 txt.textContent = b.label;
                 beltGroup.appendChild(txt);
             });
             svg.appendChild(beltGroup);
 
-            // Soft translucent wine belt bands
-            svg.appendChild(createEl('rect', {
-                x: 0, y: belts.n50, width: 1000, height: belts.n30 - belts.n50,
-                fill: 'rgba(212, 175, 55, 0.032)', 'pointer-events': 'none'
-            }));
-            svg.appendChild(createEl('rect', {
-                x: 0, y: belts.s30, width: 1000, height: belts.s50 - belts.s30,
-                fill: 'rgba(212, 175, 55, 0.032)', 'pointer-events': 'none'
-            }));
-
-            // Continent base silhouettes
-            const contGroup = createEl('g');
-            Object.values(atlas.continents).forEach(pts => {
-                contGroup.appendChild(createEl('polygon', { points: pts, class: 'world-continent' }));
+            // Smooth Continents & Islands Base Layer
+            const contGroup = createEl('g', { filter: 'url(#atlasLandShadow)' });
+            Object.values(atlas.continentPaths || {}).forEach(d => {
+                contGroup.appendChild(createEl('path', { d, class: 'world-continent' }));
             });
             svg.appendChild(contGroup);
 
-            // Clickable Wine Country polygons + markers
+            // Clickable Wine Nations + Scale-Aware Pins
             const countriesGroup = createEl('g');
-            const labelsGroup = createEl('g');
+            const pinsGroup = createEl('g');
+
+            const labelOffsets = {
+                'FRANCE': [-20, -14],
+                'SPAIN': [-22, 17],
+                'PORTUGAL': [-34, 4],
+                'ITALY': [16, 18],
+                'GERMANY': [4, -18],
+                'AUSTRIA': [28, -5],
+                'GREECE': [22, 18],
+                'WORLD GEMS': [6, -16],
+                'CHILE': [-24, 4],
+                'ARGENTINA': [26, 11],
+                'USA': [0, -17],
+                'AUSTRALIA': [0, -17],
+                'NEW ZEALAND': [0, -17],
+                'SOUTH AFRICA': [0, -17]
+            };
 
             atlas.countries.forEach(c => {
                 const count = counts[c.id] || 0;
-                const intensity = count > 0 ? 0.38 + 0.56 * Math.sqrt(count / maxCount) : 0;
+                const intensity = count > 0 ? 0.42 + 0.52 * Math.sqrt(count / maxCount) : 0;
 
-                const poly = createEl('polygon', {
-                    points: c.worldPoints,
+                const shape = createEl('path', {
+                    d: c.worldPath,
                     class: `atlas-geo-shape ${count > 0 ? 'has-wines' : 'no-wines'}`,
                     'data-country': c.id,
                     tabindex: '0',
@@ -283,113 +417,95 @@
                     'aria-label': `${c.name}: ${count} wines. Open regional map.`
                 });
                 if (count > 0) {
-                    poly.style.fill = palette.active;
-                    poly.style.fillOpacity = String(Math.min(0.92, intensity));
-                    poly.style.stroke = palette.accent;
+                    shape.style.fill = palette.active;
+                    shape.style.fillOpacity = String(Math.min(0.92, intensity));
+                    shape.style.stroke = palette.accent;
                 } else {
-                    poly.style.fill = '#231F1B';
-                    poly.style.fillOpacity = '0.6';
-                    poly.style.stroke = 'rgba(212,175,55,0.22)';
+                    shape.style.fill = '#231F1B';
+                    shape.style.fillOpacity = '0.55';
+                    shape.style.stroke = 'rgba(212,175,55,0.22)';
                 }
 
                 const onEnter = (ev) => {
-                    poly.classList.add('is-hovered');
+                    shape.classList.add('is-hovered');
                     this._showTooltip(
                         ev,
-                        `${c.name} (${c.world})`,
-                        `${count} ${count === 1 ? 'selection' : 'selections'} · ${c.regions.length} wine regions`,
+                        `${c.name} · ${c.world}`,
+                        `${count} ${count === 1 ? 'selection' : 'selections'} across ${c.regions.length} wine regions`,
                         c.tagline
                     );
                 };
                 const onLeave = () => {
-                    poly.classList.remove('is-hovered');
+                    shape.classList.remove('is-hovered');
                     this._hideTooltip();
                 };
                 const onClick = () => this.onSelectCountry(c.id);
 
-                poly.addEventListener('mouseenter', onEnter);
-                poly.addEventListener('mousemove', onEnter);
-                poly.addEventListener('mouseleave', onLeave);
-                poly.addEventListener('click', onClick);
-                poly.addEventListener('keydown', (e) => {
+                shape.addEventListener('mouseenter', onEnter);
+                shape.addEventListener('mousemove', onEnter);
+                shape.addEventListener('mouseleave', onLeave);
+                shape.addEventListener('click', onClick);
+                shape.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); }
                 });
-                countriesGroup.appendChild(poly);
+                countriesGroup.appendChild(shape);
 
-                // Clean circular interactive pin & count badge (helps small European countries stay easy to tap!)
-                const pinGroup = createEl('g', {
+                // Local-origin pin group so we can cleanly scale it on focus zoom
+                const pin = createEl('g', {
                     class: 'atlas-country-pin',
+                    'data-cx': c.worldLx,
+                    'data-cy': c.worldLy,
+                    transform: `translate(${c.worldLx}, ${c.worldLy}) scale(1)`,
                     style: 'cursor:pointer;'
                 });
-                const r = count > 0 ? Math.min(11, 6.5 + Math.sqrt(count) * 1.1) : 5;
-                pinGroup.appendChild(createEl('circle', {
-                    cx: c.worldLx, cy: c.worldLy, r: r + 3.5,
-                    fill: count > 0 ? palette.active : '#2A2520',
-                    'fill-opacity': count > 0 ? '0.24' : '0.12'
-                }));
-                pinGroup.appendChild(createEl('circle', {
-                    cx: c.worldLx, cy: c.worldLy, r,
-                    fill: count > 0 ? palette.accent : '#3A342E',
-                    stroke: '#0B0A09',
-                    'stroke-width': '1.2'
+
+                // Invisible generous tap target
+                pin.appendChild(createEl('circle', { cx: 0, cy: 0, r: 16, fill: 'transparent' }));
+
+                const r = count > 0 ? Math.min(10.5, 6.2 + Math.sqrt(count) * 1.05) : 4.5;
+                if (count > 0) {
+                    pin.appendChild(createEl('circle', {
+                        cx: 0, cy: 0, r: r + 4,
+                        fill: palette.active, 'fill-opacity': '0.26'
+                    }));
+                }
+                pin.appendChild(createEl('circle', {
+                    cx: 0, cy: 0, r,
+                    fill: count > 0 ? palette.accent : '#3C3630',
+                    stroke: '#0B0A09', 'stroke-width': '1.2'
                 }));
 
                 if (count > 0) {
-                    const cntTxt = createEl('text', {
-                        x: c.worldLx, y: c.worldLy + 3,
-                        'text-anchor': 'middle',
-                        class: 'atlas-geo-count-text'
-                    });
+                    const cntTxt = createEl('text', { x: 0, y: 3, 'text-anchor': 'middle', class: 'atlas-geo-count-text' });
                     cntTxt.textContent = String(count);
-                    pinGroup.appendChild(cntTxt);
+                    pin.appendChild(cntTxt);
                 }
 
-                // Offset overlapping European labels cleanly
-                const labelOffsets = {
-                    'FRANCE': [-16, -15],
-                    'SPAIN': [-22, 16],
-                    'PORTUGAL': [-34, 4],
-                    'ITALY': [16, 18],
-                    'GERMANY': [4, -18],
-                    'AUSTRIA': [28, -6],
-                    'GREECE': [22, 18],
-                    'WORLD GEMS': [0, -16],
-                    'CHILE': [-24, 4],
-                    'ARGENTINA': [24, 10],
-                    'USA': [0, -16],
-                    'AUSTRALIA': [0, -16],
-                    'NEW ZEALAND': [0, -16],
-                    'SOUTH AFRICA': [0, -16]
-                };
-                const [dx, dy] = labelOffsets[c.id] || [0, -14];
-                const lbl = createEl('text', {
-                    x: c.worldLx + dx,
-                    y: c.worldLy + dy,
-                    'text-anchor': 'middle',
-                    class: 'atlas-geo-label'
-                });
+                const [dx, dy] = labelOffsets[c.id] || [0, -15];
+                const lbl = createEl('text', { x: dx, y: dy, 'text-anchor': 'middle', class: 'atlas-geo-label' });
                 lbl.textContent = c.short;
-                pinGroup.appendChild(lbl);
+                pin.appendChild(lbl);
 
-                pinGroup.addEventListener('mouseenter', onEnter);
-                pinGroup.addEventListener('mousemove', onEnter);
-                pinGroup.addEventListener('mouseleave', onLeave);
-                pinGroup.addEventListener('click', onClick);
-                labelsGroup.appendChild(pinGroup);
+                pin.addEventListener('mouseenter', onEnter);
+                pin.addEventListener('mousemove', onEnter);
+                pin.addEventListener('mouseleave', onLeave);
+                pin.addEventListener('click', onClick);
+                pinsGroup.appendChild(pin);
             });
 
             svg.appendChild(countriesGroup);
-            svg.appendChild(labelsGroup);
+            svg.appendChild(pinsGroup);
 
             this.svgEl = svg;
             this.stageEl.insertBefore(svg, this.stageEl.firstChild);
+            this._updateWorldPinScale(this.activeFocus);
 
-            // Populate Country Quick-Jump Strip
+            // Populate Thumb-Friendly Country Carousel below map
             const sortedCountries = [...atlas.countries].sort((a, b) => (counts[b.id] || 0) - (counts[a.id] || 0));
             this.quickJumpEl.innerHTML = sortedCountries.map(c => {
                 const cnt = counts[c.id] || 0;
                 return `<button type="button" class="quickjump-pill" data-jump-country="${c.id}">
-                    <span>${global.AtlasStore.escapeHtml(c.name)}</span>
+                    <span class="qj-name">${global.AtlasStore.escapeHtml(c.name)}</span>
                     <span class="qj-count">${cnt}</span>
                 </button>`;
             }).join('');
@@ -412,21 +528,20 @@
             const palette = this._getPalette();
             const countryWines = this.filteredWines.filter(w => w.country === country.id);
             const regionCounts = {};
-            countryWines.forEach(w => {
-                regionCounts[w.region] = (regionCounts[w.region] || 0) + 1;
-            });
+            countryWines.forEach(w => { regionCounts[w.region] = (regionCounts[w.region] || 0) + 1; });
             const maxCount = Math.max(1, ...Object.values(regionCounts));
 
             this.breadcrumbsEl.innerHTML = `
-                <button type="button" class="crumb-btn" id="crumbBackWorld">&larr; World Atlas</button>
+                <button type="button" class="crumb-btn" id="crumbBackWorld">&larr; World</button>
                 <span class="crumb-sep">/</span>
                 <span class="crumb-current">${global.AtlasStore.escapeHtml(country.name)}</span>
             `;
             this.breadcrumbsEl.querySelector('#crumbBackWorld').addEventListener('click', () => this.onBackToWorld());
+            if (this.focusTabsEl) this.focusTabsEl.style.display = 'none';
 
-            this.statusEl.textContent = `${countryWines.length} ${countryWines.length === 1 ? 'selection' : 'selections'} across ${Object.keys(regionCounts).length} active regions`;
+            this.statusEl.textContent = `${countryWines.length} wines · ${Object.keys(regionCounts).length} regions`;
             this.viewAllBtn.style.display = 'inline-flex';
-            this.viewAllBtn.textContent = `View All ${country.name} (${countryWines.length})`;
+            this.viewAllBtn.textContent = `All ${country.short} (${countryWines.length})`;
 
             this.terroirCardEl.innerHTML = `
                 <div class="terroir-kicker">${global.AtlasStore.escapeHtml(country.world)} &middot; Regional Atlas</div>
@@ -434,55 +549,72 @@
                 <div class="terroir-desc">${global.AtlasStore.escapeHtml(country.tagline)}</div>
             `;
 
+            const vb = country.mapViewBox || '0 0 600 520';
+            this._currentVB = parseVB(vb);
+
             const svg = createEl('svg', {
                 class: 'atlas-svg-canvas',
-                viewBox: country.mapViewBox || '0 0 600 520',
+                viewBox: vb,
+                preserveAspectRatio: 'xMidYMid meet',
                 role: 'img',
                 'aria-label': `Interactive Wine Map of ${country.name}`
             });
 
-            // Subtle compass rose watermark in corner
-            const compass = createEl('g', { opacity: '0.28', transform: 'translate(546, 56)' });
-            compass.appendChild(createEl('circle', { cx: 0, cy: 0, r: 22, fill: 'none', stroke: '#D4AF37', 'stroke-width': '0.9' }));
-            compass.appendChild(createEl('line', { x1: 0, y1: -28, x2: 0, y2: 28, stroke: '#D4AF37', 'stroke-width': '0.8' }));
-            compass.appendChild(createEl('line', { x1: -28, y1: 0, x2: 28, y2: 0, stroke: '#D4AF37', 'stroke-width': '0.8' }));
-            const nTxt = createEl('text', { x: 0, y: -31, 'text-anchor': 'middle', fill: '#D4AF37', 'font-size': '9', 'font-family': 'Cinzel, serif' });
+            const defs = createEl('defs');
+            defs.innerHTML = `
+                <radialGradient id="countryGlow" cx="50%" cy="48%" r="55%">
+                    <stop offset="0%" stop-color="rgba(212, 175, 55, 0.09)" />
+                    <stop offset="100%" stop-color="rgba(9, 8, 7, 0)" />
+                </radialGradient>
+                <filter id="countryDrop" x="-10%" y="-10%" width="120%" height="120%">
+                    <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.65" />
+                </filter>
+            `;
+            svg.appendChild(defs);
+            svg.appendChild(createEl('rect', { x: 0, y: 0, width: 600, height: 520, fill: 'url(#countryGlow)', 'pointer-events': 'none' }));
+
+            // Fine engraved compass rose
+            const compass = createEl('g', { opacity: '0.32', transform: 'translate(544, 52)', 'pointer-events': 'none' });
+            compass.appendChild(createEl('circle', { cx: 0, cy: 0, r: 20, fill: 'none', stroke: '#D4AF37', 'stroke-width': '0.9' }));
+            compass.appendChild(createEl('circle', { cx: 0, cy: 0, r: 14, fill: 'none', stroke: '#D4AF37', 'stroke-width': '0.5', 'stroke-dasharray': '2 2' }));
+            compass.appendChild(createEl('polygon', { points: '0,-24 3.5,-6 0,-10 -3.5,-6', fill: '#D4AF37' }));
+            compass.appendChild(createEl('line', { x1: 0, y1: -24, x2: 0, y2: 24, stroke: '#D4AF37', 'stroke-width': '0.7' }));
+            compass.appendChild(createEl('line', { x1: -24, y1: 0, x2: 24, y2: 0, stroke: '#D4AF37', 'stroke-width': '0.7' }));
+            const nTxt = createEl('text', { x: 0, y: -27, 'text-anchor': 'middle', fill: '#D4AF37', 'font-size': '8.5', 'font-family': 'Cinzel, serif', 'font-weight': '600' });
             nTxt.textContent = 'N';
             compass.appendChild(nTxt);
             svg.appendChild(compass);
 
-            // Base Country Outline(s)
+            // Smooth Country Base Silhouette
             if (!country.isShowcaseGrid) {
-                const baseGroup = createEl('g');
-                (country.outlines || []).forEach(pts => {
-                    baseGroup.appendChild(createEl('polygon', { points: pts, class: 'country-outline-base' }));
+                const baseGroup = createEl('g', { filter: 'url(#countryDrop)' });
+                (country.outlinePaths || []).forEach(d => {
+                    baseGroup.appendChild(createEl('path', { d, class: 'country-outline-base' }));
                 });
                 svg.appendChild(baseGroup);
             }
 
-            // Clickable Wine Region Polygons
+            // Organic Clickable Wine Region Zones + Crisp Labels
             const regionsGroup = createEl('g');
             const labelsGroup = createEl('g');
 
             country.regions.forEach((reg, idx) => {
                 const count = regionCounts[reg.id] || 0;
-                const intensity = count > 0 ? 0.36 + 0.56 * Math.sqrt(count / maxCount) : 0;
+                const intensity = count > 0 ? 0.38 + 0.54 * Math.sqrt(count / maxCount) : 0;
 
                 let shapeEl;
                 let lx = reg.lx;
                 let ly = reg.ly;
 
                 if (country.isShowcaseGrid) {
-                    // Clean curated medallion layout for World Gems (Georgia, Hungary, Lebanon, Uruguay, Canada)
-                    const cols = 3;
-                    const col = idx % cols;
-                    const row = Math.floor(idx / cols);
-                    const rx = 68 + col * 164 + (row === 1 ? 82 : 0);
-                    const ry = 105 + row * 175;
-                    lx = rx + 68;
-                    ly = ry + 62;
+                    const col = idx % 3;
+                    const row = Math.floor(idx / 3);
+                    const rx = 56 + col * 172 + (row === 1 ? 86 : 0);
+                    const ry = 95 + row * 175;
+                    lx = rx + 72;
+                    ly = ry + 64;
                     shapeEl = createEl('rect', {
-                        x: rx, y: ry, width: 136, height: 124, rx: 16,
+                        x: rx, y: ry, width: 144, height: 128, rx: 18,
                         class: `atlas-geo-shape ${count > 0 ? 'has-wines' : 'no-wines'}`,
                         'data-region': reg.id,
                         tabindex: '0',
@@ -490,8 +622,8 @@
                         'aria-label': `${reg.name}: ${count} wines`
                     });
                 } else {
-                    shapeEl = createEl('polygon', {
-                        points: reg.points,
+                    shapeEl = createEl('path', {
+                        d: reg.path,
                         class: `atlas-geo-shape ${count > 0 ? 'has-wines' : 'no-wines'}`,
                         'data-region': reg.id,
                         tabindex: '0',
@@ -506,7 +638,7 @@
                     shapeEl.style.stroke = palette.accent;
                 } else {
                     shapeEl.style.fill = '#211D19';
-                    shapeEl.style.fillOpacity = '0.55';
+                    shapeEl.style.fillOpacity = '0.5';
                     shapeEl.style.stroke = 'rgba(212, 175, 55, 0.22)';
                 }
 
@@ -539,11 +671,11 @@
                 });
                 regionsGroup.appendChild(shapeEl);
 
-                // Region Label + Bottle Count Pill
+                // Clean label + count pill
                 const lbl = createEl('text', {
-                    x: lx, y: ly - (count > 0 ? 4 : 0),
+                    x: lx, y: ly - (count > 0 ? 5 : 0),
                     'text-anchor': 'middle',
-                    class: 'atlas-geo-label'
+                    class: 'atlas-geo-label atlas-geo-label--region'
                 });
                 lbl.textContent = reg.short;
                 labelsGroup.appendChild(lbl);
@@ -551,11 +683,11 @@
                 if (count > 0) {
                     const badgeG = createEl('g', { class: 'atlas-geo-count-pill' });
                     badgeG.appendChild(createEl('rect', {
-                        x: lx - 12, y: ly + 2, width: 24, height: 14, rx: 7,
-                        fill: palette.accent, stroke: '#0B0A09', 'stroke-width': '0.9'
+                        x: lx - 12, y: ly + 1, width: 24, height: 15, rx: 7.5,
+                        fill: palette.accent, stroke: '#0B0A09', 'stroke-width': '1'
                     }));
                     const cnt = createEl('text', {
-                        x: lx, y: ly + 12,
+                        x: lx, y: ly + 11.5,
                         'text-anchor': 'middle',
                         class: 'atlas-geo-count-text'
                     });
@@ -571,12 +703,12 @@
             this.svgEl = svg;
             this.stageEl.insertBefore(svg, this.stageEl.firstChild);
 
-            // Populate Region Quick-Jump Strip
+            // Populate Regional Quick-Jump Carousel below map
             const sortedRegions = [...country.regions].sort((a, b) => (regionCounts[b.id] || 0) - (regionCounts[a.id] || 0));
             this.quickJumpEl.innerHTML = sortedRegions.map(r => {
                 const cnt = regionCounts[r.id] || 0;
                 return `<button type="button" class="quickjump-pill" data-jump-region="${r.id}">
-                    <span>${global.AtlasStore.escapeHtml(r.name)}</span>
+                    <span class="qj-name">${global.AtlasStore.escapeHtml(r.name)}</span>
                     <span class="qj-count">${cnt}</span>
                 </button>`;
             }).join('');

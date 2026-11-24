@@ -1,38 +1,60 @@
 /**
- * Global Wine Cellar Atlas — Luxury Editorial Hospitality Design System
- * White-label responsive styles powered by --atlas-* CSS custom properties.
- * Aesthetic: Warm Obsidian, Antique Gold, Burgundy, Parchment Ivory.
+ * Global Wine Cellar Atlas — Mobile-First Luxury Editorial Design System
+ * White-label responsive architecture powered by --atlas-* CSS tokens.
+ * Typography Hierarchy:
+ *   1. Eyebrow / Overline  : Inter 0.66rem uppercase +0.20em tracking (gold-soft)
+ *   2. Display H1          : Cinzel fluid 1.65rem–3.15rem +0.09em tracking (ivory)
+ *   3. Section H2          : Cinzel fluid 1.12rem–1.48rem +0.07em tracking (ivory)
+ *   4. Wine / Card Title   : Cormorant 1.24rem–1.42rem semibold (ivory, high legibility)
+ *   5. Editorial Prose     : Cormorant 1.04rem–1.20rem line-height 1.58 (warm parchment)
+ *   6. UI Meta & Prices    : Inter 0.74rem–0.92rem tabular-nums (3 contrast tiers)
  */
 
 :root {
-    --atlas-bg: #0B0A09;
-    --atlas-surface: #141210;
-    --atlas-surface-elevated: #1C1916;
-    --atlas-surface-hover: #25211C;
+    /* Surfaces — 3-tier warm obsidian depth */
+    --atlas-bg: #090807;
+    --atlas-surface: #13110F;
+    --atlas-surface-elevated: #1B1814;
+    --atlas-surface-hover: #24201B;
+
+    /* Luxury Accents */
     --atlas-gold: #D4AF37;
-    --atlas-gold-soft: #E6CB78;
-    --atlas-gold-deep: #A88424;
+    --atlas-gold-soft: #E8CF82;
+    --atlas-gold-deep: #A68222;
     --atlas-burgundy: #7A2331;
-    --atlas-ivory: #F5F0E6;
-    --atlas-muted: #B6ADA0;
+
+    /* Optical Contrast Text Tiers (WCAG AA+ on obsidian) */
+    --atlas-ivory: #F7F2E8;
+    --atlas-prose: #D8D0C3;
+    --atlas-muted: #B8AFA1;
     --atlas-subtle: #8C8275;
-    --atlas-border: rgba(212, 175, 55, 0.22);
-    --atlas-border-strong: rgba(212, 175, 55, 0.48);
-    --atlas-shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.38);
-    --atlas-shadow-md: 0 14px 36px rgba(0, 0, 0, 0.52);
-    --atlas-shadow-lg: 0 24px 56px rgba(0, 0, 0, 0.68);
+
+    /* Hairline Borders & Inner Specular Highlights */
+    --atlas-border: rgba(212, 175, 55, 0.18);
+    --atlas-border-strong: rgba(212, 175, 55, 0.46);
+    --atlas-specular: inset 0 1px 0 rgba(255, 246, 224, 0.06);
+
+    /* Elevation Shadows */
+    --atlas-shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.42);
+    --atlas-shadow-md: 0 14px 36px rgba(0, 0, 0, 0.56);
+    --atlas-shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.72);
+
+    /* Typography */
     --atlas-font-display: 'Cinzel', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
     --atlas-font-editorial: 'Cormorant', Garamond, Georgia, serif;
     --atlas-font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --atlas-radius-sm: 8px;
+
+    /* Radii */
+    --atlas-radius-sm: 10px;
     --atlas-radius-md: 14px;
-    --atlas-radius-lg: 18px;
+    --atlas-radius-lg: 20px;
 }
 
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    -webkit-tap-highlight-color: transparent;
 }
 
 html, body {
@@ -40,13 +62,14 @@ html, body {
     background-color: var(--atlas-bg);
     color: var(--atlas-ivory);
     font-family: var(--atlas-font-editorial);
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
 }
 
 ::selection {
-    background: rgba(212, 175, 55, 0.28);
+    background: rgba(212, 175, 55, 0.3);
     color: var(--atlas-ivory);
 }
 
@@ -74,46 +97,46 @@ textarea:focus-visible,
 }
 
 /* ==========================================================================
-   Shared Top Navigation Bar
+   Shared Mobile-First Sticky Top Navigation (56px mobile -> 66px desktop)
    ========================================================================== */
 .atlas-topbar {
     position: sticky;
     top: 0;
-    z-index: 200;
+    z-index: 220;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    padding: 0.7rem clamp(1rem, 3vw, 1.85rem);
-    min-height: 66px;
-    background: linear-gradient(180deg, rgba(16, 14, 12, 0.98) 0%, rgba(11, 10, 9, 0.94) 100%);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    gap: 0.65rem;
+    padding: 0.48rem 0.85rem;
+    min-height: 56px;
+    background: rgba(12, 11, 9, 0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--atlas-border);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
 }
 
 .atlas-brand-link {
     display: flex;
     align-items: center;
-    gap: 0.85rem;
+    gap: 0.65rem;
     text-decoration: none;
     color: var(--atlas-ivory);
     min-width: 0;
 }
 
 .atlas-crest-badge {
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     border: 1px solid var(--atlas-border);
     background: rgba(212, 175, 55, 0.06);
-    padding: 5px;
+    padding: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: border-color 0.25s ease, transform 0.25s ease;
+    transition: border-color 0.22s ease, transform 0.22s ease;
 }
 
 .atlas-brand-link:hover .atlas-crest-badge {
@@ -135,11 +158,11 @@ textarea:focus-visible,
 
 .atlas-brand-name {
     font-family: var(--atlas-font-display);
-    font-size: clamp(0.95rem, 1.5vw, 1.18rem);
+    font-size: 0.92rem;
     font-weight: 600;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.11em;
     text-transform: uppercase;
-    color: var(--atlas-gold);
+    color: var(--atlas-gold-soft);
     line-height: 1.15;
     white-space: nowrap;
     overflow: hidden;
@@ -148,36 +171,58 @@ textarea:focus-visible,
 
 .atlas-brand-sub {
     font-family: var(--atlas-font-ui);
-    font-size: 0.7rem;
+    font-size: 0.62rem;
+    font-weight: 500;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--atlas-muted);
-    margin-top: 2px;
+    color: var(--atlas-subtle);
+    margin-top: 1px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.atlas-nav-links {
+.atlas-topbar-actions {
     display: flex;
     align-items: center;
     gap: 0.45rem;
+}
+
+/* Mobile-first hidden nav drawer, revealed cleanly on click or desktop */
+.atlas-nav-links {
+    display: none;
+}
+
+.atlas-nav-links.is-mobile-open {
+    display: flex;
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    background: rgba(14, 12, 10, 0.98);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--atlas-border-strong);
+    padding: 0.9rem 1rem 1.1rem;
     flex-wrap: wrap;
+    gap: 0.5rem;
+    z-index: 250;
+    box-shadow: var(--atlas-shadow-lg);
 }
 
 .atlas-nav-pill {
     display: inline-flex;
     align-items: center;
-    gap: 0.42rem;
-    padding: 0.48rem 0.9rem;
+    gap: 0.4rem;
+    padding: 0.46rem 0.85rem;
     border-radius: 999px;
     background: rgba(212, 175, 55, 0.06);
     border: 1px solid rgba(212, 175, 55, 0.2);
-    color: var(--atlas-ivory);
+    color: var(--atlas-prose);
     font-family: var(--atlas-font-ui);
-    font-size: 0.76rem;
+    font-size: 0.74rem;
     font-weight: 500;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
     text-decoration: none;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -186,12 +231,13 @@ textarea:focus-visible,
 
 .atlas-nav-pill:hover,
 .atlas-nav-pill.is-active {
-    background: rgba(212, 175, 55, 0.18);
+    background: rgba(212, 175, 55, 0.16);
     border-color: var(--atlas-gold);
     color: var(--atlas-gold-soft);
 }
 
-.atlas-nav-pill .compare-badge {
+.compare-badge,
+.filter-count-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -200,35 +246,47 @@ textarea:focus-visible,
     padding: 0 5px;
     border-radius: 999px;
     background: var(--atlas-gold);
-    color: #0B0A09;
-    font-size: 0.68rem;
+    color: #090807;
+    font-family: var(--atlas-font-ui);
+    font-size: 0.66rem;
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
 }
 
-/* Mobile Nav Toggle Button */
+.atlas-icon-btn,
 .atlas-mobile-menu-btn {
-    display: none;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 40px;
     height: 40px;
-    border-radius: 10px;
+    border-radius: 11px;
     border: 1px solid var(--atlas-border);
-    background: rgba(212, 175, 55, 0.08);
-    color: var(--atlas-gold);
+    background: rgba(212, 175, 55, 0.07);
+    color: var(--atlas-gold-soft);
     cursor: pointer;
+    transition: all 0.18s ease;
+    flex-shrink: 0;
+}
+
+.atlas-icon-btn:hover,
+.atlas-icon-btn.is-active,
+.atlas-mobile-menu-btn:hover {
+    border-color: var(--atlas-gold);
+    background: rgba(212, 175, 55, 0.18);
+    color: var(--atlas-ivory);
 }
 
 /* ==========================================================================
-   Shared Gold Divider & Buttons
+   Shared Ornaments, Buttons, Badges
    ========================================================================== */
 .gold-divider {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.85rem;
-    width: 210px;
-    margin: 0.9rem auto 1.15rem;
+    gap: 0.75rem;
+    width: 180px;
+    margin: 0.75rem auto 1rem;
 }
 
 .gold-divider::before,
@@ -236,7 +294,7 @@ textarea:focus-visible,
     content: '';
     flex: 1;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.65), transparent);
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.6), transparent);
 }
 
 .gold-diamond {
@@ -251,19 +309,29 @@ textarea:focus-visible,
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0.6rem 1.15rem;
-    border-radius: 10px;
+    gap: 0.45rem;
+    min-height: 40px;
+    padding: 0.52rem 1rem;
+    border-radius: 11px;
     border: 1px solid var(--atlas-border);
-    background: rgba(24, 21, 18, 0.85);
+    background: var(--atlas-surface-elevated);
+    box-shadow: var(--atlas-specular);
     color: var(--atlas-ivory);
     font-family: var(--atlas-font-ui);
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 500;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
     cursor: pointer;
     text-decoration: none;
-    transition: all 0.22s ease;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.atlas-btn--sm {
+    min-height: 32px;
+    padding: 0.3rem 0.72rem;
+    font-size: 0.72rem;
+    border-radius: 999px;
 }
 
 .atlas-btn:hover {
@@ -273,80 +341,78 @@ textarea:focus-visible,
 }
 
 .atlas-btn--primary {
-    background: linear-gradient(135deg, var(--atlas-gold) 0%, var(--atlas-gold-deep) 100%);
-    color: #0B0A09;
+    background: linear-gradient(135deg, var(--atlas-gold-soft) 0%, var(--atlas-gold) 52%, var(--atlas-gold-deep) 100%);
+    color: #090807;
     border-color: var(--atlas-gold-soft);
     font-weight: 600;
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.22);
 }
 
 .atlas-btn--primary:hover {
-    background: linear-gradient(135deg, var(--atlas-gold-soft) 0%, var(--atlas-gold) 100%);
-    color: #0B0A09;
+    filter: brightness(1.06);
+    color: #090807;
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+    box-shadow: 0 10px 24px rgba(212, 175, 55, 0.32);
 }
 
-/* ==========================================================================
-   Style Color Dots & Badges
-   ========================================================================== */
+/* Style Dots & Wine Badges */
 .style-dot {
-    width: 9px;
-    height: 9px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     display: inline-block;
     flex-shrink: 0;
 }
 .style-dot--ALL           { background: var(--atlas-gold); }
-.style-dot--RED           { background: #A82E42; }
-.style-dot--WHITE         { background: #DFCA74; }
-.style-dot--ROSE          { background: #D48A95; }
-.style-dot--ORANGE        { background: #D8873E; }
-.style-dot--SPARKLING     { background: #F0D988; box-shadow: 0 0 6px rgba(240, 217, 136, 0.6); }
-.style-dot--DESSERT       { background: #C48A34; }
-.style-dot--NON-ALCOHOLIC { background: #6CA57B; }
+.style-dot--RED           { background: #B53348; }
+.style-dot--WHITE         { background: #E3CE78; }
+.style-dot--ROSE          { background: #DA8F9B; }
+.style-dot--ORANGE        { background: #DF8D42; }
+.style-dot--SPARKLING     { background: #F5DF90; box-shadow: 0 0 6px rgba(245, 223, 144, 0.65); }
+.style-dot--DESSERT       { background: #CA8E38; }
+.style-dot--NON-ALCOHOLIC { background: #6FA97E; }
 
 .wine-style-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    padding: 0.2rem 0.6rem;
+    gap: 0.32rem;
+    padding: 0.2rem 0.56rem;
     border-radius: 999px;
     font-family: var(--atlas-font-ui);
-    font-size: 0.68rem;
+    font-size: 0.64rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
-    border: 1px solid rgba(212, 175, 55, 0.28);
+    border: 1px solid rgba(212, 175, 55, 0.26);
     background: rgba(212, 175, 55, 0.1);
     color: var(--atlas-gold-soft);
 }
 
-.wine-style-badge--RED           { background: rgba(139, 38, 53, 0.35); border-color: rgba(201, 75, 92, 0.5); color: #F4BCC4; }
-.wine-style-badge--WHITE         { background: rgba(197, 169, 82, 0.2); border-color: rgba(229, 206, 123, 0.45); color: #F5E6AA; }
-.wine-style-badge--ROSE          { background: rgba(183, 110, 121, 0.25); border-color: rgba(219, 160, 169, 0.45); color: #F6CDD3; }
-.wine-style-badge--ORANGE        { background: rgba(200, 125, 59, 0.25); border-color: rgba(228, 159, 94, 0.5); color: #F7CCA2; }
-.wine-style-badge--SPARKLING     { background: rgba(212, 175, 55, 0.22); border-color: rgba(242, 217, 132, 0.55); color: #FAF0C6; }
-.wine-style-badge--DESSERT       { background: rgba(176, 119, 38, 0.28); border-color: rgba(220, 168, 86, 0.5); color: #F7D8A4; }
-.wine-style-badge--NON-ALCOHOLIC { background: rgba(91, 140, 103, 0.25); border-color: rgba(131, 184, 144, 0.5); color: #C2E5CA; }
+.wine-style-badge--RED           { background: rgba(139, 38, 53, 0.32); border-color: rgba(209, 86, 102, 0.45); color: #F7C5CC; }
+.wine-style-badge--WHITE         { background: rgba(197, 169, 82, 0.18); border-color: rgba(229, 206, 123, 0.4); color: #F7EAB4; }
+.wine-style-badge--ROSE          { background: rgba(183, 110, 121, 0.22); border-color: rgba(219, 160, 169, 0.42); color: #FAD4DA; }
+.wine-style-badge--ORANGE        { background: rgba(200, 125, 59, 0.22); border-color: rgba(228, 159, 94, 0.46); color: #FAD3AC; }
+.wine-style-badge--SPARKLING     { background: rgba(212, 175, 55, 0.2); border-color: rgba(242, 217, 132, 0.5); color: #FCF2CE; }
+.wine-style-badge--DESSERT       { background: rgba(176, 119, 38, 0.24); border-color: rgba(220, 168, 86, 0.46); color: #FADDAE; }
+.wine-style-badge--NON-ALCOHOLIC { background: rgba(91, 140, 103, 0.22); border-color: rgba(131, 184, 144, 0.46); color: #C9EBD1; }
 
 .organic-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.18rem 0.55rem;
+    padding: 0.2rem 0.52rem;
     border-radius: 999px;
     font-family: var(--atlas-font-ui);
-    font-size: 0.66rem;
+    font-size: 0.62rem;
     font-weight: 600;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    background: rgba(74, 134, 88, 0.22);
-    border: 1px solid rgba(122, 186, 136, 0.42);
-    color: #B4E2BE;
+    background: rgba(74, 134, 88, 0.2);
+    border: 1px solid rgba(122, 186, 136, 0.4);
+    color: #BCE8C6;
 }
 
 /* ==========================================================================
-   Atlas Interactive Workspace Layout (wine-map.html)
+   Mobile-First Interactive Atlas Shell (wine-map.html)
    ========================================================================== */
 .atlas-app-shell {
     display: flex;
@@ -354,7 +420,7 @@ textarea:focus-visible,
     height: 100vh;
     height: 100dvh;
     overflow: hidden;
-    background: radial-gradient(ellipse at 50% 0%, #191511 0%, var(--atlas-bg) 62%);
+    background: radial-gradient(ellipse at 50% 0%, #17130F 0%, var(--atlas-bg) 60%);
 }
 
 .atlas-workspace {
@@ -365,26 +431,16 @@ textarea:focus-visible,
     position: relative;
 }
 
-/* Desktop Left Sidebar (Wine Categories & Sommelier Filter Sidebar) */
+/* Desktop Sidebar hidden by default (mobile-first), shown >= 1024px */
 .atlas-sidebar {
-    width: 268px;
-    flex-shrink: 0;
-    background: linear-gradient(180deg, rgba(18, 16, 14, 0.98) 0%, rgba(12, 11, 9, 0.98) 100%);
-    border-right: 1px solid var(--atlas-border);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    padding: 1rem 0.9rem 1.25rem;
-    gap: 1.05rem;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(212, 175, 55, 0.35) transparent;
+    display: none;
 }
 
 .sidebar-section-heading {
     font-family: var(--atlas-font-ui);
-    font-size: 0.68rem;
+    font-size: 0.66rem;
     font-weight: 600;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--atlas-gold-soft);
     margin-bottom: 0.5rem;
@@ -396,7 +452,7 @@ textarea:focus-visible,
 .style-cards-list {
     display: flex;
     flex-direction: column;
-    gap: 0.45rem;
+    gap: 0.42rem;
 }
 
 .style-card-btn {
@@ -404,11 +460,11 @@ textarea:focus-visible,
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.65rem;
-    padding: 0.65rem 0.8rem;
-    border-radius: 11px;
-    background: rgba(24, 21, 18, 0.72);
-    border: 1px solid rgba(212, 175, 55, 0.14);
+    gap: 0.6rem;
+    padding: 0.62rem 0.78rem;
+    border-radius: 12px;
+    background: rgba(24, 21, 18, 0.75);
+    border: 1px solid rgba(212, 175, 55, 0.13);
     color: var(--atlas-ivory);
     cursor: pointer;
     text-align: left;
@@ -416,15 +472,14 @@ textarea:focus-visible,
 }
 
 .style-card-btn:hover {
-    background: rgba(212, 175, 55, 0.1);
-    border-color: rgba(212, 175, 55, 0.42);
-    transform: translateX(2px);
+    background: rgba(212, 175, 55, 0.09);
+    border-color: rgba(212, 175, 55, 0.38);
 }
 
 .style-card-btn.is-active {
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(122, 35, 49, 0.16) 100%);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.18) 0%, rgba(122, 35, 49, 0.15) 100%);
     border-color: var(--atlas-gold);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--atlas-specular), 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
 .style-card-left {
@@ -435,28 +490,29 @@ textarea:focus-visible,
 }
 
 .style-card-name {
-    font-family: var(--atlas-font-display);
-    font-size: 0.84rem;
+    font-family: var(--atlas-font-ui);
+    font-size: 0.8rem;
     font-weight: 600;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.02em;
     color: var(--atlas-ivory);
 }
 
 .style-card-sub {
     font-family: var(--atlas-font-ui);
     font-size: 0.68rem;
-    color: var(--atlas-muted);
+    color: var(--atlas-subtle);
     margin-top: 1px;
 }
 
 .style-card-count {
     font-family: var(--atlas-font-ui);
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 600;
+    font-variant-numeric: tabular-nums;
     color: var(--atlas-gold-soft);
     background: rgba(212, 175, 55, 0.1);
     border: 1px solid rgba(212, 175, 55, 0.2);
-    padding: 0.18rem 0.5rem;
+    padding: 0.16rem 0.5rem;
     border-radius: 999px;
     flex-shrink: 0;
 }
@@ -470,17 +526,19 @@ textarea:focus-visible,
 .filter-chip {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    padding: 0.42rem 0.72rem;
+    gap: 0.36rem;
+    min-height: 34px;
+    padding: 0.38rem 0.76rem;
     border-radius: 999px;
-    border: 1px solid rgba(212, 175, 55, 0.22);
-    background: rgba(20, 18, 16, 0.82);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    background: var(--atlas-surface-elevated);
     color: var(--atlas-muted);
     font-family: var(--atlas-font-ui);
     font-size: 0.74rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    white-space: nowrap;
+    transition: all 0.18s ease;
 }
 
 .filter-chip:hover {
@@ -490,12 +548,12 @@ textarea:focus-visible,
 
 .filter-chip.is-active {
     background: var(--atlas-gold);
-    color: #0B0A09;
+    color: #090807;
     border-color: var(--atlas-gold-soft);
     font-weight: 600;
 }
 
-/* Main Right Column (Search Bar + Map Stage / Wine List View) */
+/* Main Stage Column */
 .atlas-main-stage {
     flex: 1;
     min-width: 0;
@@ -506,41 +564,46 @@ textarea:focus-visible,
     position: relative;
 }
 
-/* Search & Utility Bar */
+/* Mobile-First Collapsible Search Drawer (collapsed on phone until Search icon tapped) */
 .atlas-search-bar {
+    display: none;
     flex-shrink: 0;
-    display: flex;
     align-items: center;
-    gap: 0.65rem;
-    padding: 0.72rem 1.2rem;
-    background: rgba(14, 13, 11, 0.92);
+    gap: 0.55rem;
+    padding: 0.6rem 0.85rem;
+    background: rgba(15, 13, 11, 0.96);
     border-bottom: 1px solid var(--atlas-border);
     flex-wrap: wrap;
-    z-index: 50;
+    z-index: 60;
+}
+
+.atlas-search-bar.is-mobile-open {
+    display: flex;
 }
 
 .atlas-search-wrap {
     position: relative;
     flex: 1;
-    min-width: 220px;
+    min-width: 200px;
 }
 
 .atlas-search-icon {
     position: absolute;
-    left: 0.9rem;
+    left: 0.88rem;
     top: 50%;
     transform: translateY(-50%);
     color: var(--atlas-gold);
     pointer-events: none;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
 }
 
 .atlas-search-input {
     width: 100%;
-    padding: 0.62rem 2.4rem 0.62rem 2.5rem;
+    min-height: 40px;
+    padding: 0.55rem 2.3rem 0.55rem 2.4rem;
     border-radius: 999px;
     border: 1px solid rgba(212, 175, 55, 0.28);
-    background: rgba(22, 19, 16, 0.92);
+    background: rgba(22, 19, 16, 0.94);
     color: var(--atlas-ivory);
     font-family: var(--atlas-font-ui);
     font-size: 0.84rem;
@@ -549,7 +612,7 @@ textarea:focus-visible,
 }
 
 .atlas-search-input::placeholder {
-    color: rgba(182, 173, 160, 0.65);
+    color: rgba(184, 175, 161, 0.6);
 }
 
 .atlas-search-input:focus {
@@ -567,12 +630,11 @@ textarea:focus-visible,
     color: var(--atlas-muted);
     cursor: pointer;
     display: none;
+    font-size: 1.15rem;
     padding: 4px;
 }
 
-.atlas-search-clear.visible {
-    display: inline-flex;
-}
+.atlas-search-clear.visible { display: inline-flex; }
 
 .atlas-autocomplete {
     position: absolute;
@@ -583,15 +645,13 @@ textarea:focus-visible,
     border: 1px solid var(--atlas-border-strong);
     border-radius: 14px;
     box-shadow: var(--atlas-shadow-lg);
-    max-height: 360px;
+    max-height: 52vh;
     overflow-y: auto;
-    z-index: 300;
+    z-index: 320;
     display: none;
 }
 
-.atlas-autocomplete.open {
-    display: block;
-}
+.atlas-autocomplete.open { display: block; }
 
 .autocomplete-item {
     width: 100%;
@@ -599,14 +659,13 @@ textarea:focus-visible,
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    padding: 0.65rem 0.95rem;
+    padding: 0.68rem 0.95rem;
     background: transparent;
     border: none;
     border-bottom: 1px solid rgba(212, 175, 55, 0.08);
     color: var(--atlas-ivory);
     text-align: left;
     cursor: pointer;
-    transition: background 0.15s ease;
 }
 
 .autocomplete-item:last-child { border-bottom: none; }
@@ -614,14 +673,14 @@ textarea:focus-visible,
 
 .autocomplete-title {
     font-family: var(--atlas-font-editorial);
-    font-size: 1.05rem;
+    font-size: 1.08rem;
     font-weight: 600;
     color: var(--atlas-ivory);
 }
 
 .autocomplete-meta {
     font-family: var(--atlas-font-ui);
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     color: var(--atlas-muted);
 }
 
@@ -629,22 +688,24 @@ textarea:focus-visible,
     font-family: var(--atlas-font-ui);
     font-size: 0.82rem;
     font-weight: 600;
+    font-variant-numeric: tabular-nums;
     color: var(--atlas-gold-soft);
     white-space: nowrap;
 }
 
 .atlas-bar-actions {
-    display: flex;
+    display: none;
     align-items: center;
     gap: 0.45rem;
     flex-wrap: wrap;
 }
 
 .atlas-select {
-    padding: 0.52rem 0.8rem;
+    min-height: 38px;
+    padding: 0.46rem 0.78rem;
     border-radius: 10px;
     border: 1px solid rgba(212, 175, 55, 0.25);
-    background: rgba(22, 19, 16, 0.92);
+    background: var(--atlas-surface-elevated);
     color: var(--atlas-ivory);
     font-family: var(--atlas-font-ui);
     font-size: 0.78rem;
@@ -655,29 +716,31 @@ textarea:focus-visible,
 .active-filters-strip {
     display: none;
     align-items: center;
-    gap: 0.45rem;
-    flex-wrap: wrap;
-    padding: 0.45rem 1.2rem;
+    gap: 0.4rem;
+    padding: 0.42rem 0.85rem;
     background: rgba(212, 175, 55, 0.06);
     border-bottom: 1px solid rgba(212, 175, 55, 0.14);
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-shrink: 0;
 }
-
-.active-filters-strip.has-filters {
-    display: flex;
-}
+.active-filters-strip::-webkit-scrollbar { display: none; }
+.active-filters-strip.has-filters { display: flex; }
 
 .active-pill {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    padding: 0.24rem 0.65rem;
+    padding: 0.22rem 0.62rem;
     border-radius: 999px;
     background: rgba(212, 175, 55, 0.16);
     border: 1px solid rgba(212, 175, 55, 0.4);
     color: var(--atlas-gold-soft);
     font-family: var(--atlas-font-ui);
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .active-pill button {
@@ -685,13 +748,13 @@ textarea:focus-visible,
     border: none;
     color: inherit;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     line-height: 1;
     padding: 0 2px;
 }
 
 /* ==========================================================================
-   Interactive World & Regional Map Canvas
+   Interactive Map Canvas & Focus Controls (Mobile-First Full Bleed)
    ========================================================================== */
 .atlas-map-container {
     flex: 1;
@@ -707,9 +770,9 @@ textarea:focus-visible,
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
-    padding: 0.6rem 1.2rem;
-    background: rgba(15, 13, 11, 0.82);
+    gap: 0.5rem;
+    padding: 0.48rem 0.8rem;
+    background: rgba(14, 12, 10, 0.88);
     border-bottom: 1px solid rgba(212, 175, 55, 0.12);
     flex-wrap: wrap;
 }
@@ -717,14 +780,14 @@ textarea:focus-visible,
 .map-breadcrumbs {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.35rem;
     font-family: var(--atlas-font-ui);
-    font-size: 0.78rem;
+    font-size: 0.72rem;
 }
 
 .crumb-btn {
-    background: none;
-    border: none;
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.25);
     color: var(--atlas-gold-soft);
     font-family: inherit;
     font-size: inherit;
@@ -732,18 +795,63 @@ textarea:focus-visible,
     letter-spacing: 0.06em;
     text-transform: uppercase;
     cursor: pointer;
-    padding: 0.2rem 0.4rem;
-    border-radius: 6px;
+    padding: 0.24rem 0.58rem;
+    border-radius: 999px;
 }
 
-.crumb-btn:hover { background: rgba(212, 175, 55, 0.14); }
+.crumb-btn:hover { background: rgba(212, 175, 55, 0.2); }
 .crumb-sep { color: var(--atlas-subtle); }
-.crumb-current { color: var(--atlas-ivory); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.crumb-current {
+    color: var(--atlas-ivory);
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+/* Segmented Focus Tabs (World | Europe | Americas | South) */
+.map-focus-tabs {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(22, 19, 16, 0.95);
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    border-radius: 999px;
+    padding: 2px;
+    gap: 2px;
+}
+
+.focus-tab-btn {
+    border: none;
+    background: transparent;
+    color: var(--atlas-muted);
+    font-family: var(--atlas-font-ui);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.62rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.focus-tab-btn:hover { color: var(--atlas-ivory); }
+.focus-tab-btn.is-active {
+    background: var(--atlas-gold);
+    color: #090807;
+}
+
+.map-subbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
 
 .map-status-text {
+    display: none;
     font-family: var(--atlas-font-ui);
-    font-size: 0.76rem;
+    font-size: 0.72rem;
     color: var(--atlas-muted);
+    font-variant-numeric: tabular-nums;
 }
 
 .map-stage-wrap {
@@ -755,9 +863,10 @@ textarea:focus-visible,
     justify-content: center;
     overflow: hidden;
     background:
-        radial-gradient(ellipse at 50% 48%, rgba(212, 175, 55, 0.07) 0%, transparent 62%),
-        linear-gradient(180deg, #0D0C0A 0%, #090807 100%);
+        radial-gradient(ellipse at 50% 48%, rgba(212, 175, 55, 0.075) 0%, transparent 62%),
+        linear-gradient(180deg, #0D0C0A 0%, #080706 100%);
     user-select: none;
+    touch-action: none;
 }
 
 .atlas-svg-canvas {
@@ -766,42 +875,45 @@ textarea:focus-visible,
     max-width: 100%;
     max-height: 100%;
     display: block;
-    transition: transform 0.22s ease;
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* World & Country SVG Cartographic Styles */
+/* Engraved Luxury Cartographic Styles */
 .world-continent {
-    fill: #1A1714;
-    stroke: rgba(212, 175, 55, 0.16);
-    stroke-width: 0.8;
+    fill: #1A1713;
+    stroke: rgba(212, 175, 55, 0.18);
+    stroke-width: 0.75;
+    stroke-linejoin: round;
     pointer-events: none;
 }
 
 .wine-belt-line {
-    stroke: rgba(212, 175, 55, 0.15);
-    stroke-width: 0.7;
+    stroke: rgba(212, 175, 55, 0.14);
+    stroke-width: 0.65;
     stroke-dasharray: 4 5;
     pointer-events: none;
 }
 
 .wine-belt-label {
-    fill: rgba(212, 175, 55, 0.36);
+    fill: rgba(212, 175, 55, 0.34);
     font-family: var(--atlas-font-ui);
-    font-size: 8.5px;
+    font-size: 7.5px;
+    font-weight: 600;
     letter-spacing: 1px;
     pointer-events: none;
 }
 
 .country-outline-base {
     fill: #171411;
-    stroke: rgba(212, 175, 55, 0.35);
+    stroke: rgba(212, 175, 55, 0.36);
     stroke-width: 1.4;
+    stroke-linejoin: round;
     pointer-events: none;
 }
 
 .atlas-geo-shape {
     cursor: pointer;
-    stroke-width: 1.25;
+    stroke-width: 1.15;
     stroke-linejoin: round;
     transition: fill-opacity 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease, filter 0.2s ease;
 }
@@ -809,15 +921,12 @@ textarea:focus-visible,
 .atlas-geo-shape.has-wines:hover,
 .atlas-geo-shape.is-hovered {
     fill-opacity: 0.96 !important;
-    stroke: #FFF6DC !important;
-    stroke-width: 2.1 !important;
+    stroke: #FFF7DF !important;
+    stroke-width: 2 !important;
     filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.55));
 }
 
-.atlas-geo-shape.no-wines {
-    cursor: pointer;
-    opacity: 0.55;
-}
+.atlas-geo-shape.no-wines { opacity: 0.5; }
 
 .atlas-geo-label {
     font-family: var(--atlas-font-ui);
@@ -825,38 +934,40 @@ textarea:focus-visible,
     font-weight: 600;
     fill: #FAF4E8;
     paint-order: stroke;
-    stroke: rgba(11, 10, 9, 0.92);
-    stroke-width: 3px;
+    stroke: rgba(9, 8, 7, 0.94);
+    stroke-width: 3.2px;
     pointer-events: none;
     letter-spacing: 0.04em;
 }
 
-.atlas-geo-count-pill {
-    pointer-events: none;
+.atlas-geo-label--region {
+    font-size: 10.5px;
 }
+
+.atlas-geo-count-pill { pointer-events: none; }
 
 .atlas-geo-count-text {
     font-family: var(--atlas-font-ui);
     font-size: 8.5px;
     font-weight: 700;
-    fill: #0B0A09;
+    fill: #090807;
     pointer-events: none;
 }
 
-/* Floating Zoom Controls */
+/* Compact Floating Zoom Controls */
 .map-zoom-controls {
     position: absolute;
-    right: 1rem;
-    top: 1rem;
+    right: 0.65rem;
+    top: 0.65rem;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.3rem;
     z-index: 30;
 }
 
 .map-zoom-btn {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 10px;
     background: rgba(18, 16, 14, 0.88);
     border: 1px solid var(--atlas-border);
@@ -874,143 +985,100 @@ textarea:focus-visible,
 
 .map-zoom-btn:hover {
     background: var(--atlas-gold);
-    color: #0B0A09;
-    border-color: var(--atlas-gold-soft);
+    color: #090807;
 }
 
-/* Floating Map Tooltip */
+/* Desktop Floating Tooltip & Terroir Dossier Card */
 .atlas-map-tooltip {
     position: absolute;
     z-index: 45;
     pointer-events: none;
-    background: rgba(16, 14, 12, 0.96);
+    background: rgba(15, 13, 11, 0.96);
     border: 1px solid var(--atlas-border-strong);
     border-radius: 12px;
     padding: 0.65rem 0.9rem;
     box-shadow: var(--atlas-shadow-md);
-    max-width: 260px;
+    max-width: 265px;
     opacity: 0;
     transform: translateY(4px);
     transition: opacity 0.16s ease, transform 0.16s ease;
 }
+.atlas-map-tooltip.visible { opacity: 1; transform: translateY(0); }
+.tip-title { font-family: var(--atlas-font-display); font-size: 0.88rem; font-weight: 600; color: var(--atlas-gold-soft); }
+.tip-count { font-family: var(--atlas-font-ui); font-size: 0.72rem; font-weight: 600; color: var(--atlas-ivory); margin: 2px 0 4px; }
+.tip-sub { font-family: var(--atlas-font-editorial); font-size: 0.92rem; line-height: 1.35; color: var(--atlas-prose); }
 
-.atlas-map-tooltip.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.tip-title {
-    font-family: var(--atlas-font-display);
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--atlas-gold-soft);
-    margin-bottom: 2px;
-}
-
-.tip-count {
-    font-family: var(--atlas-font-ui);
-    font-size: 0.74rem;
-    font-weight: 600;
-    color: var(--atlas-ivory);
-    margin-bottom: 4px;
-}
-
-.tip-sub {
-    font-family: var(--atlas-font-editorial);
-    font-size: 0.92rem;
-    line-height: 1.35;
-    color: var(--atlas-muted);
-}
-
-/* Country / Region Dossier Floating Card (bottom-left of map) */
 .atlas-terroir-card {
+    display: none;
     position: absolute;
     left: 1rem;
     bottom: 1rem;
     z-index: 25;
     max-width: 310px;
-    background: rgba(17, 15, 13, 0.92);
+    background: rgba(16, 14, 12, 0.92);
     border: 1px solid var(--atlas-border);
     border-radius: 14px;
-    padding: 0.9rem 1rem;
+    padding: 0.85rem 1rem;
     backdrop-filter: blur(12px);
     box-shadow: var(--atlas-shadow-md);
 }
+.terroir-kicker { font-family: var(--atlas-font-ui); font-size: 0.64rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--atlas-gold); margin-bottom: 0.2rem; }
+.terroir-title { font-family: var(--atlas-font-display); font-size: 1.02rem; font-weight: 600; color: var(--atlas-ivory); margin-bottom: 0.25rem; }
+.terroir-desc { font-family: var(--atlas-font-editorial); font-size: 0.95rem; line-height: 1.4; color: var(--atlas-prose); }
 
-.terroir-kicker {
-    font-family: var(--atlas-font-ui);
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--atlas-gold);
-    margin-bottom: 0.25rem;
-}
-
-.terroir-title {
-    font-family: var(--atlas-font-display);
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--atlas-ivory);
-    margin-bottom: 0.3rem;
-}
-
-.terroir-desc {
-    font-family: var(--atlas-font-editorial);
-    font-size: 0.95rem;
-    line-height: 1.42;
-    color: var(--atlas-muted);
-}
-
-/* Quick-Jump Strip Below Map (Countries in World View, Regions in Country View) */
+/* Thumb-Zone Country / Region Quick-Jump Carousel */
 .map-quickjump-strip {
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.65rem 1.1rem;
-    background: rgba(13, 12, 10, 0.96);
-    border-top: 1px solid var(--atlas-border);
+    gap: 0.42rem;
+    padding: 0.52rem 0.8rem;
+    background: rgba(12, 11, 9, 0.96);
+    border-top: 1px solid rgba(212, 175, 55, 0.14);
     overflow-x: auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
 }
+.map-quickjump-strip::-webkit-scrollbar { display: none; }
 
 .quickjump-pill {
     display: inline-flex;
     align-items: center;
     gap: 0.42rem;
-    padding: 0.4rem 0.78rem;
+    min-height: 36px;
+    padding: 0.36rem 0.78rem;
     border-radius: 999px;
-    background: rgba(24, 21, 18, 0.85);
-    border: 1px solid rgba(212, 175, 55, 0.22);
+    background: var(--atlas-surface-elevated);
+    border: 1px solid rgba(212, 175, 55, 0.2);
     color: var(--atlas-ivory);
     font-family: var(--atlas-font-ui);
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     font-weight: 500;
     white-space: nowrap;
     cursor: pointer;
-    transition: all 0.18s ease;
+    scroll-snap-align: start;
     flex-shrink: 0;
+    transition: all 0.18s ease;
 }
 
 .quickjump-pill:hover {
     border-color: var(--atlas-gold);
-    background: rgba(212, 175, 55, 0.16);
+    background: rgba(212, 175, 55, 0.14);
     color: var(--atlas-gold-soft);
 }
 
 .quickjump-pill .qj-count {
-    font-size: 0.68rem;
+    font-size: 0.66rem;
     font-weight: 700;
-    color: var(--atlas-gold);
+    font-variant-numeric: tabular-nums;
+    color: var(--atlas-gold-soft);
     background: rgba(212, 175, 55, 0.12);
     padding: 1px 6px;
     border-radius: 999px;
 }
 
 /* ==========================================================================
-   Wines Grid Panel (Inline Drawer / View When Region or Search Selected)
+   Wines Grid & Refined Luxury Wine Cards
    ========================================================================== */
 .atlas-wines-view {
     flex: 1;
@@ -1020,34 +1088,38 @@ textarea:focus-visible,
     overflow: hidden;
     background: linear-gradient(180deg, #100E0C 0%, var(--atlas-bg) 100%);
 }
-
-.atlas-wines-view.is-open {
-    display: flex;
-}
+.atlas-wines-view.is-open { display: flex; }
 
 .wines-view-header {
     flex-shrink: 0;
     display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    padding: 0.85rem 0.95rem;
+    border-bottom: 1px solid var(--atlas-border);
+    background: rgba(16, 14, 12, 0.96);
+}
+
+.wines-view-header-top {
+    display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem 1.35rem;
-    border-bottom: 1px solid var(--atlas-border);
-    background: rgba(18, 16, 14, 0.94);
+    gap: 0.75rem;
     flex-wrap: wrap;
 }
 
 .wines-view-title-block h2 {
     font-family: var(--atlas-font-display);
-    font-size: clamp(1.15rem, 2vw, 1.5rem);
+    font-size: clamp(1.08rem, 2.2vw, 1.45rem);
     font-weight: 600;
     letter-spacing: 0.06em;
     color: var(--atlas-ivory);
+    line-height: 1.2;
 }
 
 .wines-view-title-block p {
-    font-family: var(--atlas-font-editorial);
-    font-size: 1rem;
+    font-family: var(--atlas-font-ui);
+    font-size: 0.74rem;
     color: var(--atlas-muted);
     margin-top: 2px;
 }
@@ -1055,40 +1127,40 @@ textarea:focus-visible,
 .wines-grid-scroll {
     flex: 1;
     overflow-y: auto;
-    padding: 1.25rem 1.35rem 2.25rem;
+    padding: 0.95rem 0.95rem 2.25rem;
 }
 
 .wines-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-    gap: 1.1rem;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
 }
 
 .wine-card {
     position: relative;
     display: grid;
-    grid-template-columns: 76px 1fr;
-    gap: 0.95rem;
-    padding: 1.05rem;
+    grid-template-columns: 68px 1fr;
+    gap: 0.85rem;
+    padding: 0.95rem 1rem;
     border-radius: var(--atlas-radius-md);
-    background: linear-gradient(155deg, rgba(26, 23, 20, 0.95) 0%, rgba(15, 13, 11, 0.98) 100%);
-    border: 1px solid rgba(212, 175, 55, 0.2);
-    box-shadow: var(--atlas-shadow-sm);
+    background: linear-gradient(155deg, rgba(25, 22, 18, 0.96) 0%, rgba(14, 12, 10, 0.98) 100%);
+    border: 1px solid rgba(212, 175, 55, 0.18);
+    box-shadow: var(--atlas-specular), var(--atlas-shadow-sm);
     text-decoration: none;
     color: var(--atlas-ivory);
-    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
     cursor: pointer;
+    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
 }
 
 .wine-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     border-color: var(--atlas-gold);
     box-shadow: var(--atlas-shadow-md);
 }
 
 .bottle-visual-frame {
     width: 100%;
-    height: 158px;
+    height: 146px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1099,53 +1171,63 @@ textarea:focus-visible,
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-    filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.55));
+    filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.58));
 }
 
 .wine-card-info {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 0.45rem;
+    gap: 0.35rem;
     min-width: 0;
 }
 
 .wine-card-badges {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.32rem;
     flex-wrap: wrap;
 }
 
+/* Text Hierarchy Level 1: Producer Overline */
 .wine-card-producer {
     font-family: var(--atlas-font-ui);
-    font-size: 0.7rem;
+    font-size: 0.66rem;
     font-weight: 600;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--atlas-gold-soft);
+    margin-top: 0.25rem;
 }
 
+/* Text Hierarchy Level 4: Editorial Serif Wine Title (crisp & scannable) */
 .wine-card-name {
-    font-family: var(--atlas-font-display);
-    font-size: 1.04rem;
+    font-family: var(--atlas-font-editorial);
+    font-size: clamp(1.2rem, 2.2vw, 1.36rem);
     font-weight: 600;
-    line-height: 1.25;
+    line-height: 1.18;
     color: var(--atlas-ivory);
+    letter-spacing: 0.01em;
 }
 
 .wine-card-origin {
     font-family: var(--atlas-font-ui);
-    font-size: 0.74rem;
+    font-size: 0.72rem;
+    font-weight: 500;
     color: var(--atlas-muted);
+    letter-spacing: 0.02em;
 }
 
 .wine-card-varietal {
     font-family: var(--atlas-font-editorial);
     font-size: 0.96rem;
     font-style: italic;
-    color: rgba(245, 240, 230, 0.78);
+    color: var(--atlas-subtle);
     line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .wine-card-footer {
@@ -1153,34 +1235,36 @@ textarea:focus-visible,
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
-    padding-top: 0.55rem;
-    margin-top: 0.25rem;
-    border-top: 1px solid rgba(212, 175, 55, 0.14);
+    padding-top: 0.5rem;
+    margin-top: 0.2rem;
+    border-top: 1px solid rgba(212, 175, 55, 0.12);
 }
 
 .wine-card-prices {
     display: flex;
     align-items: baseline;
-    gap: 0.65rem;
+    gap: 0.6rem;
     font-family: var(--atlas-font-ui);
+    font-variant-numeric: tabular-nums;
 }
 
 .price-bottle {
     font-size: 0.98rem;
     font-weight: 700;
-    color: var(--atlas-gold);
+    color: var(--atlas-gold-soft);
 }
 
 .price-glass {
-    font-size: 0.75rem;
+    font-size: 0.73rem;
     color: var(--atlas-muted);
 }
 
 .wine-compare-toggle {
-    padding: 0.28rem 0.6rem;
+    min-height: 28px;
+    padding: 0.22rem 0.62rem;
     border-radius: 999px;
-    border: 1px solid rgba(212, 175, 55, 0.28);
-    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.26);
+    background: rgba(212, 175, 55, 0.07);
     color: var(--atlas-gold-soft);
     font-family: var(--atlas-font-ui);
     font-size: 0.68rem;
@@ -1192,86 +1276,28 @@ textarea:focus-visible,
 .wine-compare-toggle:hover,
 .wine-compare-toggle.is-added {
     background: var(--atlas-gold);
-    color: #0B0A09;
+    color: #090807;
     border-color: var(--atlas-gold-soft);
 }
 
 /* ==========================================================================
-   Modal Dialogs (Varietal / Region Picker)
-   ========================================================================== */
-.atlas-modal-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 600;
-    background: rgba(5, 4, 3, 0.78);
-    backdrop-filter: blur(8px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-}
-
-.atlas-modal-backdrop.open {
-    display: flex;
-}
-
-.atlas-modal {
-    width: 100%;
-    max-width: 680px;
-    max-height: 82vh;
-    background: #161310;
-    border: 1px solid var(--atlas-border-strong);
-    border-radius: 18px;
-    box-shadow: var(--atlas-shadow-lg);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.atlas-modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--atlas-border);
-}
-
-.atlas-modal-header h3 {
-    font-family: var(--atlas-font-display);
-    font-size: 1.08rem;
-    letter-spacing: 0.08em;
-    color: var(--atlas-gold-soft);
-}
-
-.atlas-modal-body {
-    padding: 1rem 1.25rem 1.35rem;
-    overflow-y: auto;
-}
-
-.modal-grid-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.48rem;
-    margin-top: 0.75rem;
-}
-
-/* ==========================================================================
-   Mobile Bottom Dock (Verisimilitude of PWA14 Mobile UX)
+   Mobile Bottom Control Dock & Slide-Up Filter Sheet
    ========================================================================== */
 .mobile-bottom-dock {
-    display: none;
+    display: flex;
     flex-shrink: 0;
-    background: rgba(14, 13, 11, 0.98);
+    background: rgba(12, 11, 9, 0.98);
     border-top: 1px solid var(--atlas-border);
-    padding: 0.55rem 0.75rem calc(0.65rem + env(safe-area-inset-bottom, 0px));
+    padding: 0.5rem 0.75rem calc(0.6rem + env(safe-area-inset-bottom, 0px));
     flex-direction: column;
-    gap: 0.5rem;
-    z-index: 80;
+    gap: 0.48rem;
+    z-index: 90;
+    box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.55);
 }
 
 .mobile-style-rail {
     display: flex;
-    gap: 0.4rem;
+    gap: 0.38rem;
     overflow-x: auto;
     scrollbar-width: none;
 }
@@ -1285,135 +1311,261 @@ textarea:focus-visible,
 
 .mobile-filter-sheet {
     display: none;
-    padding: 0.75rem 0.25rem 0.4rem;
+    max-height: 46vh;
+    overflow-y: auto;
+    padding: 0.55rem 0.15rem 0.65rem;
     border-bottom: 1px solid rgba(212, 175, 55, 0.16);
     flex-direction: column;
-    gap: 0.65rem;
+    gap: 0.75rem;
 }
 
-.mobile-filter-sheet.open {
-    display: flex;
+.mobile-filter-sheet.open { display: flex; }
+
+.mobile-sheet-handle {
+    width: 38px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(212, 175, 55, 0.35);
+    margin: 0 auto 0.25rem;
 }
 
 /* ==========================================================================
-   Editorial Content Pages (By the Glass, Comparison, Regions, Story, Sparkling)
+   Modals (Bottom Sheet feel on mobile -> Centered Dialog on desktop)
+   ========================================================================== */
+.atlas-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 600;
+    background: rgba(5, 4, 3, 0.8);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+}
+
+.atlas-modal-backdrop.open { display: flex; }
+
+.atlas-modal {
+    width: 100%;
+    max-width: 680px;
+    max-height: 85vh;
+    background: #15120F;
+    border: 1px solid var(--atlas-border-strong);
+    border-bottom: none;
+    border-radius: 22px 22px 0 0;
+    box-shadow: var(--atlas-shadow-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.atlas-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.95rem 1.15rem;
+    border-bottom: 1px solid var(--atlas-border);
+}
+
+.atlas-modal-header h3 {
+    font-family: var(--atlas-font-display);
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    color: var(--atlas-gold-soft);
+}
+
+.atlas-modal-body {
+    padding: 0.95rem 1.15rem calc(1.4rem + env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+}
+
+.modal-grid-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.75rem;
+}
+
+/* ==========================================================================
+   Editorial Content Pages (Typography & Spacing Hierarchy)
    ========================================================================== */
 .editorial-container {
     width: 100%;
-    max-width: 1180px;
+    max-width: 1160px;
     margin: 0 auto;
-    padding: clamp(1.5rem, 3.5vw, 2.75rem) clamp(1rem, 3vw, 1.75rem) 4rem;
+    padding: 1.35rem 1rem 4rem;
 }
 
 .editorial-hero {
     text-align: center;
-    max-width: 760px;
-    margin: 0 auto 2.25rem;
+    max-width: 720px;
+    margin: 0 auto 1.75rem;
 }
 
 .editorial-kicker {
     font-family: var(--atlas-font-ui);
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 600;
-    letter-spacing: 0.24em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--atlas-gold-soft);
-    margin-bottom: 0.65rem;
+    margin-bottom: 0.5rem;
 }
 
 .editorial-title {
     font-family: var(--atlas-font-display);
-    font-size: clamp(1.85rem, 4vw, 2.85rem);
+    font-size: clamp(1.65rem, 4.2vw, 2.85rem);
     font-weight: 600;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--atlas-ivory);
-    line-height: 1.15;
+    line-height: 1.14;
 }
 
 .editorial-lead {
     font-family: var(--atlas-font-editorial);
-    font-size: clamp(1.1rem, 1.6vw, 1.28rem);
-    line-height: 1.55;
-    color: var(--atlas-muted);
+    font-size: clamp(1.06rem, 1.6vw, 1.26rem);
+    line-height: 1.56;
+    color: var(--atlas-prose);
 }
 
 .editorial-panel {
-    background: linear-gradient(165deg, rgba(24, 21, 18, 0.96) 0%, rgba(14, 12, 10, 0.98) 100%);
+    background: linear-gradient(165deg, rgba(23, 20, 17, 0.96) 0%, rgba(13, 11, 9, 0.98) 100%);
     border: 1px solid var(--atlas-border);
     border-radius: var(--atlas-radius-lg);
-    padding: clamp(1.25rem, 3vw, 2.2rem);
-    box-shadow: var(--atlas-shadow-md);
+    padding: 1.15rem;
+    box-shadow: var(--atlas-specular), var(--atlas-shadow-md);
 }
 
 /* Toast Notifications */
 .atlas-toast {
     position: fixed;
-    bottom: 1.4rem;
+    bottom: 5.5rem;
     left: 50%;
-    transform: translateX(-50%) translateY(16px);
+    transform: translateX(-50%) translateY(14px);
     z-index: 900;
-    background: #181512;
+    background: #1A1713;
     border: 1px solid var(--atlas-gold);
     border-radius: 12px;
-    padding: 0.72rem 1.25rem;
+    padding: 0.68rem 1.15rem;
     color: var(--atlas-ivory);
     font-family: var(--atlas-font-ui);
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     box-shadow: var(--atlas-shadow-lg);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.22s ease, transform 0.22s ease;
+    white-space: nowrap;
+    max-width: 92vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
+.atlas-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-.atlas-toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
+/* ==========================================================================
+   Tablet Progressive Enhancement (>= 680px)
+   ========================================================================== */
+@media (min-width: 680px) {
+    .wines-cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+        gap: 1.05rem;
+    }
+    .wine-card {
+        grid-template-columns: 76px 1fr;
+        padding: 1.05rem 1.15rem;
+    }
+    .editorial-container {
+        padding: 2rem 1.5rem 4.25rem;
+    }
+    .editorial-panel {
+        padding: 1.75rem 2rem;
+    }
+    .atlas-modal-backdrop {
+        align-items: center;
+        padding: 1rem;
+    }
+    .atlas-modal {
+        border-bottom: 1px solid var(--atlas-border-strong);
+        border-radius: 20px;
+    }
+    .map-status-text {
+        display: inline;
+    }
 }
 
 /* ==========================================================================
-   Responsive Breakpoints
+   Desktop Progressive Enhancement (>= 1024px)
    ========================================================================== */
-@media (max-width: 980px) {
-    .atlas-sidebar {
-        display: none;
+@media (min-width: 1024px) {
+    .atlas-topbar {
+        padding: 0.68rem 1.75rem;
+        min-height: 66px;
     }
-    .mobile-bottom-dock {
-        display: flex;
-    }
-    .atlas-terroir-card {
-        display: none;
-    }
-    .atlas-nav-links {
-        display: none;
-    }
-    .atlas-nav-links.is-mobile-open {
-        display: flex;
-        position: fixed;
-        top: 66px;
-        left: 0;
-        right: 0;
-        background: rgba(14, 12, 10, 0.98);
-        border-bottom: 1px solid var(--atlas-border);
-        padding: 0.85rem 1rem;
-        flex-direction: row;
-        flex-wrap: wrap;
-        z-index: 250;
-        box-shadow: var(--atlas-shadow-md);
-    }
-    .atlas-mobile-menu-btn {
-        display: inline-flex;
-    }
-}
+    .atlas-crest-badge { width: 42px; height: 42px; }
+    .atlas-brand-name { font-size: 1.1rem; }
+    .atlas-brand-sub { font-size: 0.68rem; }
 
-@media (max-width: 640px) {
+    .atlas-nav-links {
+        display: flex;
+        align-items: center;
+        gap: 0.42rem;
+    }
+    .atlas-mobile-menu-btn,
+    #mobileSearchToggleBtn {
+        display: none;
+    }
+
+    .atlas-sidebar {
+        display: flex;
+        width: 274px;
+        flex-shrink: 0;
+        background: linear-gradient(180deg, rgba(18, 16, 14, 0.98) 0%, rgba(12, 11, 9, 0.98) 100%);
+        border-right: 1px solid var(--atlas-border);
+        flex-direction: column;
+        overflow-y: auto;
+        padding: 1rem 0.9rem 1.25rem;
+        gap: 1rem;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
+    }
+
     .atlas-search-bar {
-        padding: 0.55rem 0.75rem;
+        display: flex;
+        padding: 0.7rem 1.25rem;
     }
-    .wines-cards-grid {
-        grid-template-columns: 1fr;
+    .atlas-bar-actions {
+        display: flex;
     }
+
+    .atlas-terroir-card {
+        display: block;
+    }
+
+    .mobile-bottom-dock {
+        display: none;
+    }
+
     .map-subbar {
-        padding: 0.5rem 0.75rem;
+        padding: 0.56rem 1.25rem;
+    }
+
+    .map-quickjump-strip {
+        padding: 0.62rem 1.2rem;
+    }
+
+    .wines-view-header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.35rem;
+    }
+
+    .wines-grid-scroll {
+        padding: 1.25rem 1.35rem 2.5rem;
+    }
+
+    .atlas-toast {
+        bottom: 1.5rem;
     }
 }

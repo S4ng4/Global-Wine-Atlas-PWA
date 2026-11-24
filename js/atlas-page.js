@@ -1,6 +1,7 @@
 /**
- * Controller for wine-map.html — connects WorldWineAtlasMap, Sommelier Sidebar Filters,
- * Mobile Dock, Live Search Autocomplete, Varietals/Countries Modals, and Wine Cards Grid.
+ * Controller for wine-map.html (Mobile-First Edition)
+ * Wires WorldWineAtlasMap, Collapsible Mobile Search, Desktop Sidebar, Mobile Bottom Filter Sheet,
+ * Active Filter Count Badge, Live Autocomplete, Varietal/Country Modals, and Wine Cards Grid.
  */
 (function () {
     'use strict';
@@ -26,7 +27,6 @@
     let atlasMap = null;
 
     function getMapFilteredWines() {
-        // For the map heatmap, apply all non-geographic filters (plus world hemisphere)
         return window.AtlasStore.filterWines(state.allWines, {
             ...state.filters,
             country: null,
@@ -36,6 +36,17 @@
 
     function getListFilteredWines() {
         return window.AtlasStore.filterWines(state.allWines, state.filters);
+    }
+
+    function countActiveSecondaryFilters() {
+        let n = 0;
+        if (state.filters.world !== 'ALL') n++;
+        if (state.filters.body) n++;
+        if (state.filters.varietal) n++;
+        if (state.filters.organicOnly) n++;
+        if (state.filters.byTheGlassOnly) n++;
+        if (state.filters.priceTier !== 'ALL') n++;
+        return n;
     }
 
     function parseUrlParams() {
@@ -59,12 +70,10 @@
 
     function renderStyleSelectors() {
         const store = window.AtlasStore;
-        // Count per style under current non-style filters
         const base = store.filterWines(state.allWines, { ...state.filters, style: 'ALL' });
         const counts = { ALL: base.length };
         base.forEach(w => { counts[w.style] = (counts[w.style] || 0) + 1; });
 
-        // Desktop sidebar cards
         const desktopEl = document.getElementById('desktopStyleList');
         if (desktopEl) {
             desktopEl.innerHTML = store.STYLE_ORDER.map(key => {
@@ -91,14 +100,14 @@
             });
         }
 
-        // Mobile style pill rail & list header pills
         const pillHtml = store.STYLE_ORDER.map(key => {
             const meta = store.STYLE_META[key];
             const cnt = counts[key] || 0;
             const active = state.filters.style === key;
+            const shortName = meta.label.replace(' Wines', '').replace(' / Amber', '').replace(' & Port', '');
             return `<button type="button" class="filter-chip ${active ? 'is-active' : ''}" data-style="${key}">
                 <span class="style-dot style-dot--${key}"></span>
-                <span>${store.escapeHtml(meta.label.replace(' Wines', ''))} (${cnt})</span>
+                <span>${store.escapeHtml(shortName)} (${cnt})</span>
             </button>`;
         }).join('');
 
@@ -122,15 +131,15 @@
         const store = window.AtlasStore;
 
         if (state.filters.world !== 'ALL') pills.push({ label: state.filters.world, clear: () => { state.filters.world = 'ALL'; } });
-        if (state.filters.country) pills.push({ label: `Country: ${store.getCountryDisplayName(state.filters.country)}`, clear: () => { state.filters.country = null; state.filters.region = null; } });
-        if (state.filters.region) pills.push({ label: `Region: ${store.getRegionDisplayName(state.filters.country, state.filters.region)}`, clear: () => { state.filters.region = null; } });
+        if (state.filters.country) pills.push({ label: store.getCountryDisplayName(state.filters.country), clear: () => { state.filters.country = null; state.filters.region = null; } });
+        if (state.filters.region) pills.push({ label: store.getRegionDisplayName(state.filters.country, state.filters.region), clear: () => { state.filters.region = null; } });
         if (state.filters.style !== 'ALL') pills.push({ label: store.STYLE_META[state.filters.style]?.label || state.filters.style, clear: () => { state.filters.style = 'ALL'; } });
-        if (state.filters.body) pills.push({ label: `Palate: ${state.filters.body.replace('-', ' & ')}`, clear: () => { state.filters.body = null; } });
-        if (state.filters.varietal) pills.push({ label: `Grape: ${state.filters.varietal}`, clear: () => { state.filters.varietal = null; } });
-        if (state.filters.organicOnly) pills.push({ label: 'Organic / Biodynamic', clear: () => { state.filters.organicOnly = false; } });
+        if (state.filters.body) pills.push({ label: state.filters.body.replace('-', ' & '), clear: () => { state.filters.body = null; } });
+        if (state.filters.varietal) pills.push({ label: state.filters.varietal, clear: () => { state.filters.varietal = null; } });
+        if (state.filters.organicOnly) pills.push({ label: 'Organic', clear: () => { state.filters.organicOnly = false; } });
         if (state.filters.byTheGlassOnly) pills.push({ label: 'By the Glass', clear: () => { state.filters.byTheGlassOnly = false; } });
-        if (state.filters.priceTier !== 'ALL') pills.push({ label: `Price: ${state.filters.priceTier}`, clear: () => { state.filters.priceTier = 'ALL'; } });
-        if (state.filters.search) pills.push({ label: `Search: "${state.filters.search}"`, clear: () => { state.filters.search = ''; const inp = document.getElementById('atlasSearchInput'); if (inp) inp.value = ''; } });
+        if (state.filters.priceTier !== 'ALL') pills.push({ label: `Tier: ${state.filters.priceTier}`, clear: () => { state.filters.priceTier = 'ALL'; } });
+        if (state.filters.search) pills.push({ label: `"${state.filters.search}"`, clear: () => { state.filters.search = ''; const inp = document.getElementById('atlasSearchInput'); if (inp) inp.value = ''; } });
 
         if (pills.length === 0) {
             strip.classList.remove('has-filters');
@@ -144,7 +153,7 @@
                 ${store.escapeHtml(p.label)}
                 <button type="button" data-clear-pill="${idx}" aria-label="Remove filter">&times;</button>
             </span>
-        `).join('') + `<button type="button" class="filter-chip" id="clearAllPillsBtn" style="padding:0.2rem 0.65rem;font-size:0.7rem;">Reset All</button>`;
+        `).join('') + `<button type="button" class="filter-chip" id="clearAllPillsBtn" style="min-height:26px;padding:0.16rem 0.62rem;font-size:0.68rem;">Reset</button>`;
 
         strip.querySelectorAll('[data-clear-pill]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -166,24 +175,24 @@
 
         let heading = 'Global Wine Cellar';
         if (state.filters.region && state.filters.country) {
-            heading = `${store.getRegionDisplayName(state.filters.country, state.filters.region)} — ${store.getCountryDisplayName(state.filters.country)}`;
+            heading = `${store.getRegionDisplayName(state.filters.country, state.filters.region)} · ${store.getCountryDisplayName(state.filters.country)}`;
         } else if (state.filters.country) {
-            heading = `${store.getCountryDisplayName(state.filters.country)} Selections`;
+            heading = `${store.getCountryDisplayName(state.filters.country)} Cellar`;
         } else if (state.filters.varietal) {
-            heading = `${state.filters.varietal} Across the World`;
+            heading = `${state.filters.varietal} Worldwide`;
         } else if (state.filters.search) {
-            heading = `Search Results for "${state.filters.search}"`;
+            heading = `Search: "${state.filters.search}"`;
         }
 
         if (titleEl) titleEl.textContent = heading;
-        if (subEl) subEl.textContent = `${list.length} ${list.length === 1 ? 'selection' : 'selections'} matching your sommelier filters`;
+        if (subEl) subEl.textContent = `${list.length} ${list.length === 1 ? 'selection' : 'selections'} matching your filters`;
 
         if (!grid) return;
         if (list.length === 0) {
             grid.innerHTML = `
-                <div class="editorial-panel" style="grid-column:1/-1;text-align:center;padding:3rem 1.5rem;">
-                    <h3 style="font-family:var(--atlas-font-display);color:var(--atlas-gold-soft);margin-bottom:0.6rem;">No Matching Selections</h3>
-                    <p style="color:var(--atlas-muted);margin-bottom:1.25rem;">Try broadening your style, palate, or regional filters to discover more bottles.</p>
+                <div class="editorial-panel" style="grid-column:1/-1;text-align:center;padding:2.5rem 1.25rem;">
+                    <h3 style="font-family:var(--atlas-font-display);color:var(--atlas-gold-soft);margin-bottom:0.5rem;">No Matching Selections</h3>
+                    <p style="color:var(--atlas-muted);margin-bottom:1.15rem;">Try relaxing a style, palate, or regional filter to discover more bottles.</p>
                     <button type="button" class="atlas-btn atlas-btn--primary" id="emptyResetBtn">Reset All Filters</button>
                 </div>`;
             const btn = grid.querySelector('#emptyResetBtn');
@@ -234,6 +243,13 @@
             const el = document.getElementById(id);
             if (el) el.classList.toggle('is-active', state.filters.byTheGlassOnly);
         });
+
+        const badge = document.getElementById('mobileFilterBadge');
+        const activeCount = countActiveSecondaryFilters();
+        if (badge) {
+            badge.textContent = String(activeCount);
+            badge.style.display = activeCount > 0 ? 'inline-flex' : 'none';
+        }
     }
 
     function syncViewMode() {
@@ -316,12 +332,12 @@
                 </button>`;
             }).join('');
             return `
-                <div style="margin-bottom:1.15rem;padding-bottom:0.95rem;border-bottom:1px solid rgba(212,175,55,0.12);">
-                    <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-bottom:0.45rem;">
-                        <button type="button" class="crumb-btn" data-pick-country-map="${c.id}" style="padding-left:0;font-size:0.86rem;">
-                            ${store.escapeHtml(c.name)} &middot; ${cCount} wines (${store.escapeHtml(c.world)})
-                        </button>
-                        <button type="button" class="filter-chip" data-pick-country-map="${c.id}" style="font-size:0.7rem;">Open Map &rarr;</button>
+                <div style="margin-bottom:1.1rem;padding-bottom:0.9rem;border-bottom:1px solid rgba(212,175,55,0.12);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-bottom:0.5rem;">
+                        <strong style="font-family:var(--atlas-font-display);font-size:0.92rem;letter-spacing:0.06em;color:var(--atlas-gold-soft);">
+                            ${store.escapeHtml(c.name)} <span style="font-family:var(--atlas-font-ui);font-size:0.72rem;font-weight:400;color:var(--atlas-muted);">(${cCount})</span>
+                        </strong>
+                        <button type="button" class="atlas-btn atlas-btn--sm" data-pick-country-map="${c.id}">Open Map &rarr;</button>
                     </div>
                     <div class="sidebar-chips">${regButtons}</div>
                 </div>
@@ -393,6 +409,19 @@
             });
         }
 
+        // Mobile search icon toggle (keeps map full-bleed until tapped!)
+        const mobSearchBtn = document.getElementById('mobileSearchToggleBtn');
+        const searchBar = document.getElementById('atlasSearchBar');
+        const searchInp = document.getElementById('atlasSearchInput');
+        if (mobSearchBtn && searchBar) {
+            mobSearchBtn.addEventListener('click', () => {
+                const open = searchBar.classList.toggle('is-mobile-open');
+                mobSearchBtn.classList.toggle('is-active', open);
+                mobSearchBtn.setAttribute('aria-expanded', String(open));
+                if (open && searchInp) setTimeout(() => searchInp.focus(), 60);
+            });
+        }
+
         // Hemisphere chips
         document.querySelectorAll('[data-world]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -403,7 +432,7 @@
             });
         });
 
-        // Body / Palate chips (toggleable)
+        // Body chips
         document.querySelectorAll('[data-body]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const val = btn.getAttribute('data-body');
@@ -430,14 +459,17 @@
             if (el) el.addEventListener('click', () => { state.filters.byTheGlassOnly = !state.filters.byTheGlassOnly; syncAll(); });
         });
 
-        // Sort select
-        const sortSel = document.getElementById('atlasSortSelect');
-        if (sortSel) {
-            sortSel.addEventListener('change', () => {
-                state.filters.sort = sortSel.value;
-                if (state.view === 'list') renderWinesGrid();
-            });
-        }
+        // Sort selects (desktop & mobile synced)
+        const deskSort = document.getElementById('atlasSortSelect');
+        const mobSort = document.getElementById('mobileSortSelect');
+        const handleSortChange = (val) => {
+            state.filters.sort = val;
+            if (deskSort) deskSort.value = val;
+            if (mobSort) mobSort.value = val;
+            if (state.view === 'list') renderWinesGrid();
+        };
+        if (deskSort) deskSort.addEventListener('change', () => handleSortChange(deskSort.value));
+        if (mobSort) mobSort.addEventListener('change', () => handleSortChange(mobSort.value));
 
         // View toggles
         const toggleBtn = document.getElementById('toggleMapListBtn');
@@ -448,9 +480,8 @@
             });
         }
         const sideBrowse = document.getElementById('sidebarBrowseAllBtn');
-        if (sideBrowse) {
-            sideBrowse.addEventListener('click', () => { state.view = 'list'; syncViewMode(); });
-        }
+        if (sideBrowse) sideBrowse.addEventListener('click', () => { state.view = 'list'; syncViewMode(); });
+
         const backBtn = document.getElementById('backToMapBtn');
         if (backBtn) {
             backBtn.addEventListener('click', () => {
@@ -460,25 +491,32 @@
             });
         }
 
-        // Mobile dock buttons
+        // Mobile bottom dock controls
         const mobFilterBtn = document.getElementById('mobileFiltersToggleBtn');
         const mobSheet = document.getElementById('mobileFilterSheet');
         if (mobFilterBtn && mobSheet) {
-            mobFilterBtn.addEventListener('click', () => mobSheet.classList.toggle('open'));
+            mobFilterBtn.addEventListener('click', () => {
+                const open = mobSheet.classList.toggle('open');
+                mobFilterBtn.setAttribute('aria-expanded', String(open));
+                mobSheet.setAttribute('aria-hidden', String(!open));
+            });
         }
         const mobBrowse = document.getElementById('mobileBrowseListBtn');
         if (mobBrowse) {
             mobBrowse.addEventListener('click', () => {
+                if (mobSheet) mobSheet.classList.remove('open');
                 state.view = state.view === 'list' ? 'map' : 'list';
                 syncViewMode();
             });
         }
+        const mobCountries = document.getElementById('mobileOpenCountries');
+        if (mobCountries) mobCountries.addEventListener('click', () => { if (mobSheet) mobSheet.classList.remove('open'); buildCountriesModal(); openModal('countriesModal'); });
         const mobVar = document.getElementById('mobileOpenVarietals');
-        if (mobVar) mobVar.addEventListener('click', () => { buildVarietalsModal(); openModal('varietalsModal'); });
+        if (mobVar) mobVar.addEventListener('click', () => { if (mobSheet) mobSheet.classList.remove('open'); buildVarietalsModal(); openModal('varietalsModal'); });
         const mobReset = document.getElementById('mobileResetFilters');
-        if (mobReset) mobReset.addEventListener('click', resetAllFilters);
+        if (mobReset) mobReset.addEventListener('click', () => { if (mobSheet) mobSheet.classList.remove('open'); resetAllFilters(); });
 
-        // Modals
+        // Desktop modal buttons
         const openCountriesBtn = document.getElementById('openCountriesModalBtn');
         if (openCountriesBtn) openCountriesBtn.addEventListener('click', () => { buildCountriesModal(); openModal('countriesModal'); });
         const openVarBtn = document.getElementById('openVarietalsModalBtn');
@@ -492,12 +530,9 @@
         });
 
         const varSearch = document.getElementById('varietalModalSearch');
-        if (varSearch) {
-            varSearch.addEventListener('input', () => buildVarietalsModal(varSearch.value));
-        }
+        if (varSearch) varSearch.addEventListener('input', () => buildVarietalsModal(varSearch.value));
 
         // Live Search + Autocomplete
-        const searchInp = document.getElementById('atlasSearchInput');
         const clearBtn = document.getElementById('atlasSearchClear');
         const autoBox = document.getElementById('atlasAutocomplete');
 
@@ -505,6 +540,7 @@
             if (state.filters.search) {
                 searchInp.value = state.filters.search;
                 if (clearBtn) clearBtn.classList.add('visible');
+                if (searchBar) searchBar.classList.add('is-mobile-open');
             }
 
             searchInp.addEventListener('input', () => {
@@ -513,7 +549,7 @@
                 if (clearBtn) clearBtn.classList.toggle('visible', q.length > 0);
 
                 if (q.length >= 2) {
-                    const matches = window.AtlasStore.filterWines(state.allWines, { search: q }).slice(0, 8);
+                    const matches = window.AtlasStore.filterWines(state.allWines, { search: q }).slice(0, 7);
                     if (matches.length > 0) {
                         autoBox.innerHTML = matches.map(w => `
                             <button type="button" class="autocomplete-item" data-goto-wine="${window.AtlasStore.escapeHtml(w.wine_number)}">
@@ -524,8 +560,8 @@
                                 <span class="autocomplete-price">${window.AtlasBrand.formatPrice(w.wine_price_bottle || w.wine_price)}</span>
                             </button>
                         `).join('') + `
-                            <button type="button" class="autocomplete-item" id="autoShowAllBtn" style="justify-content:center;color:var(--atlas-gold-soft);font-family:var(--atlas-font-ui);font-size:0.78rem;font-weight:600;">
-                                View all matching results in list &rarr;
+                            <button type="button" class="autocomplete-item" id="autoShowAllBtn" style="justify-content:center;color:var(--atlas-gold-soft);font-family:var(--atlas-font-ui);font-size:0.76rem;font-weight:600;">
+                                View all matching wines in list &rarr;
                             </button>
                         `;
                         autoBox.classList.add('open');

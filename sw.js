@@ -1,4 +1,4 @@
-const CACHE_NAME = 'global-wine-atlas-v1';
+const CACHE_NAME = 'global-wine-atlas-v2';
 const CORE_ASSETS = [
     './',
     './index.html',
